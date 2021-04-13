@@ -33,6 +33,7 @@ bool expressionsTrack::setupTrack(int diffThreshold)
     graybg.allocate(grabW,grabH);
     grayabs.allocate(grabW,grabH);
     diff_mode = true;
+    trackBlobs.assign(maxBlobs,TrackBlob(grabW,grabH));
     return diff_mode;
 }
 
@@ -62,7 +63,9 @@ bool expressionsTrack::doFinding()
     static int killCnt = 0;
     if(vidIn.updateInput()){
         //set using a reference to the pixel data of the video
-        grayimg.setFromPixels(vidIn.getPixelRead());
+        rgbimg.setFromPixels(vidIn.getPixelRead());
+        grayimg.setFromColorImage(rgbimg);
+        grayimg.contrastStretch();
         if(!diffbgset && diff_mode){
             graybg = grayimg;
             diffbgset = true;
@@ -72,8 +75,13 @@ bool expressionsTrack::doFinding()
         }
         if(diff_mode){
             grayabs.absDiff(graybg,grayimg);
+            graybg = grayimg;
+//            grayimg -= graybg;
+//            grayabs = grayimg;
+            grayabs.contrastStretch();
             grayabs.threshold(diff_threshold);
-            contours.findContours(grayabs,10,10000,maxBlobs,false);
+            grayabs.blur(5);
+            contours.findContours(grayabs,1000,100000,maxBlobs,false);
             blobCnt = contours.blobs.size();
         }else{
             //all the hard work done for us...
@@ -128,7 +136,7 @@ ofPoint expressionsTrack::getClosestPoint(ofPoint point)
             }
         }
     }
-    cout<<"CLOSEST POINT TO :"<<point.x<<"/"<<point.y<<" is "<<retPt.x<<"/"<<retPt.y<<"\n";
+    //cout<<"CLOSEST POINT TO :"<<point.x<<"/"<<point.y<<" is "<<retPt.x<<"/"<<retPt.y<<"\n";
     return retPt;
 }
 
@@ -151,6 +159,7 @@ void expressionsTrack::drawInput()
 void expressionsTrack::drawFindings()
 {
     drawInput();
+    grayabs.draw(0,0);
     ofNoFill();
     ofSetColor(0,255,0);//classic computer green :)
     for(int i=0; i<maxBlobs; i++){

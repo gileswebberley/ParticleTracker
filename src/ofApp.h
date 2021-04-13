@@ -48,7 +48,7 @@ class ofApp : public ofBaseApp{
 
     //int grabW{640}, grabH{480};
     bool draw_delay{true};
-    int track_delay_time{10};
+    int track_delay_time{5};
 
 public:
     //create new in setup()

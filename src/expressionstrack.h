@@ -15,13 +15,13 @@ class expressionsTrack
     //or for the difference tracking method
     ofxCvContourFinder contours;
     //load the video frame into this so we can check the colour value
-    //ofxCvColorImage rgbimg;
+    ofxCvColorImage rgbimg;
     //for the finder it must be a grayscale image
     ofxCvGrayscaleImage grayimg, graybg, grayabs;
     //seperated out the blob behaviour
     vector<TrackBlob> trackBlobs;
     //given it a limit as I was struggling to think of a way to keep track tbh
-    int maxBlobs{10}, blobCnt{0}, killWait{30};
+    int maxBlobs{10}, blobCnt{0}, killWait{2};
     //size for the grabber etc
     int grabW{352}, grabH{288};
     //difference threshold for tracking

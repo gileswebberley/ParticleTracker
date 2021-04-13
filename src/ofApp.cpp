@@ -6,7 +6,11 @@
 //--------------------------------------------------------------
 void ofApp::setup(){
     cout<<"IN SETUP....\n";
-    tracker = new expressionsTrack("haarcascade_upperbody.xml");
+    tracker = new expressionsTrack();
+    //to use haar cascades...
+    //tracker->setupTrack("haarcascade_upperbody.xml");
+    //to use difference mode then set the threshold
+    tracker->setupTrack(128);
     //ofSetFrameRate(30);
     ofHideCursor();
     ofSetVerticalSync(true);
