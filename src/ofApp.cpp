@@ -112,42 +112,36 @@ void ofApp::setup(){
 
 //--------------------------------------------------------------
 void ofApp::update(){
-    tracker->doFinding();
+    //tracker->doFinding();
         static int cntr = 0;
-        if(cntr<10){
+        static ofPoint track0;
+        if(cntr < track_delay_time){
             draw_delay = true;
-        cntr++;
+            cntr++;
         }else{
             tracker->doFinding();
             draw_delay = false;
             cntr = 0;
+            track0 = tracker->getClosestPoint(track0);
         }
-        //use the tracker to get a target point
-        vector<ofPoint> track = tracker->getCentrePoints();
-        ofPoint track0;
-        if(track.size()> 0){
-            track0= track.at(0);
-        }else{
-            track0 = ofPoint(mouseX,mouseY);
-        }
-        if(track0.x <= 0) track0.x = width;//2;
-        if(track0.y <= 0) track0.y = height;//2;
-        track0.x /= width;
-        track0.y /= height;
+        if(track0.x <= 0) track0.x = mouseX;//2;
+        if(track0.y <= 0) track0.y = mouseY;//2;
 
         //add in the particle system stuff--------------------------------------------
-
+        //start 'recording' the destination buffer
         velPingPong.dst->begin();
         ofClear(0);
         timeStep = ofGetElapsedTimef() - time0;
         time0 = ofGetElapsedTimef();
-        //start shader...
+        //start shader, working on the source buffer
         updateVel.begin();
-        updateVel.setUniformTexture("backbuffer", velPingPong.src->getTexture(), 0);   // passing the previus velocity information
-        updateVel.setUniformTexture("posData", posPingPong.src->getTexture(), 1);  // passing the position information
+        // passing the previus velocity information
+        updateVel.setUniformTexture("backbuffer", velPingPong.src->getTexture(), 0);
+        // passing the position information
+        updateVel.setUniformTexture("posData", posPingPong.src->getTexture(), 1);
         updateVel.setUniform1i("resolution", (int)textureRes);
         //pass in the target position
-        updateVel.setUniform2f("screen", (float)track0.x, (float)track0.y);
+        updateVel.setUniform2f("screen", (float)track0.x/width, (float)track0.y/height);
         updateVel.setUniform1f("timestep", (float)timeStep);
 
         // draw the source velocity texture to be updated, this is where src is
@@ -203,7 +197,7 @@ void ofApp::update(){
         ofPushStyle();
         ofEnableBlendMode( OF_BLENDMODE_ALPHA );
         //ofSetColor(255);
-
+        //draw the mesh through the rendering shaders
         mesh.drawFaces();
 
         ofDisableBlendMode();

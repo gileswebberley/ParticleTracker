@@ -128,6 +128,8 @@ ofPoint expressionsTrack::getClosestPoint(ofPoint point)
             }
         }
     }
+    cout<<"CLOSEST POINT TO :"<<point.x<<"/"<<point.y<<" is "<<retPt.x<<"/"<<retPt.y<<"\n";
+    return retPt;
 }
 
 vector<ofPoint> expressionsTrack::getCentrePoints()
