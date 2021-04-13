@@ -47,6 +47,8 @@ public:
     void drawFindings();
     //to use it just for getting the position
     vector<ofPoint> getCentrePoints();
+    //in use I want to get one point that is the closest to the last one
+    ofPoint getClosestPoint(ofPoint point);
     //so I can test and tweak see what the camera is seeing
     void drawInput();
     //I failed in making this work as I hoped :(

@@ -101,13 +101,33 @@ bool expressionsTrack::doFinding()
         //cout<<"Tracker has found "<<blobCnt<<" blobs\n";
         for(int i=0; i < blobCnt; i++){
             //cout<<"blob #"<<i<<"\n";
-            ofRectangle bb = finder.blobs[i].boundingRect;
+            ofRectangle bb = (diff_mode)? contours.blobs[i].boundingRect:finder.blobs[i].boundingRect;
+            ofPoint cp = (diff_mode)? contours.blobs[i].centroid : finder.blobs[i].centroid;
             //it seems to remain in order so each tracker should be the same object
-            trackBlobs.at(i).updateTrackBlob(finder.blobs[i].centroid, bb.width, bb.height);
+            trackBlobs.at(i).updateTrackBlob(cp, bb.width, bb.height);
         }
         return true;
     }
     return false;
+}
+
+//add in a getClosestPoint(point) method so it just tracks the closest to point
+ofPoint expressionsTrack::getClosestPoint(ofPoint point)
+{
+    vector<ofPoint> vp = getCentrePoints();
+    ofPoint retPt = point;
+    if(!vp.empty()){
+        float dist = point.distance(vp[0]);
+        retPt = vp[0];
+        for(int i=1; i<maxBlobs; i++){
+            if(trackBlobs.at(i).getInit()){
+                if(point.distance(vp[i])<dist){
+                    dist = point.distance(vp[i]);
+                    retPt = vp[i];
+                }
+            }
+        }
+    }
 }
 
 vector<ofPoint> expressionsTrack::getCentrePoints()
