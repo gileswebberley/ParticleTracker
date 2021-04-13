@@ -25,6 +25,16 @@ expressionsTrack::~expressionsTrack()
     //    }
 }
 
+//setup function for difference tracking method
+bool expressionsTrack::setupTrack(int diffThreshold)
+{
+    diff_threshold = (abs(diffThreshold)>254)?254:abs(diffThreshold);
+    grayimg.allocate(grabW,grabH);
+    graybg.allocate(grabW,grabH);
+    grayabs.allocate(grabW,grabH);
+    diff_mode = true;
+    return diff_mode;
+}
 
 bool expressionsTrack::setupTrack(string haarpath)
 {
