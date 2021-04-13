@@ -63,9 +63,23 @@ bool expressionsTrack::doFinding()
     if(vidIn.updateInput()){
         //set using a reference to the pixel data of the video
         grayimg.setFromPixels(vidIn.getPixelRead());
-        //all the hard work done for us...
-        finder.findHaarObjects(grayimg);
-        blobCnt = finder.blobs.size();
+        if(!diffbgset && diff_mode){
+            graybg = grayimg;
+            diffbgset = true;
+            cout<<"difference background image has been set....\n";
+            //there'll be no diff as it's just been set so...
+            return false;
+        }
+        if(diff_mode){
+            grayabs.absDiff(graybg,grayimg);
+            grayabs.threshold(diff_threshold);
+            contours.findContours(grayabs,10,10000,maxBlobs,false);
+            blobCnt = contours.blobs.size();
+        }else{
+            //all the hard work done for us...
+            finder.findHaarObjects(grayimg);
+            blobCnt = finder.blobs.size();
+        }
         //if we haven't found anything then give up this time
         if(blobCnt < maxBlobCnt){
             //wait for a bit so it's not twitchy
