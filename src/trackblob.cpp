@@ -19,7 +19,7 @@ void TrackBlob::updateTrackBlob(ofPoint p, int w = 1, int h = 1)
         gracefulKill();
         return;
     }
-    if(!is_init){
+    if(!getInit()){
         cout<<"This track blob is ALIVE!!....\n";
         is_init = true;
         //refresh the die time
@@ -48,7 +48,8 @@ void TrackBlob::killTrackBlob()
     if(is_init){
         //cout<<"Killing a track blob...\n";
         dying = true;
-    }else if(dying){
+    }//else
+    if(dying){
         gracefulKill();
     }
 }
@@ -60,6 +61,7 @@ void TrackBlob::gracefulKill()
 //        cout<<"dying....\n";
         ++dyingDuration;
     }else{
+        cout<<"blob is dead/n/n";
         dyingDuration = 0;
         pos = {0,0};
         rawPos = pos;

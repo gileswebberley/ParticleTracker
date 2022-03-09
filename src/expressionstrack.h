@@ -21,11 +21,15 @@ class expressionsTrack
     //seperated out the blob behaviour
     vector<TrackBlob> trackBlobs;
     //given it a limit as I was struggling to think of a way to keep track tbh
-    int maxBlobs{10}, blobCnt{0}, killWait{2};
+    int maxBlobs{10}, blobCnt{0}, killWait{5};
     //size for the grabber etc
     int grabW{352}, grabH{288};
+    //the minimum blob area to be registered in findContours()
+    float minBlobArea = (grabW*grabH)*0.005;
+    //the maximum blob area to be registered in findContours()
+    float maxBlobArea = (grabW*grabH)*0.5;
     //difference threshold for tracking
-    int diff_threshold{128};
+    int diff_threshold{200};
     //if using diff method is the background image set
     bool diffbgset{false},diff_mode{false};
     ofColor bgcolour{255,255,255};

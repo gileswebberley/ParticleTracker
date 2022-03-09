@@ -81,7 +81,7 @@ bool expressionsTrack::doFinding()
             grayabs.contrastStretch();
             grayabs.threshold(diff_threshold);
             grayabs.blur(5);
-            contours.findContours(grayabs,1000,100000,maxBlobs,false);
+            contours.findContours(grayabs,minBlobArea,maxBlobArea,maxBlobs,false);
             blobCnt = contours.blobs.size();
         }else{
             //all the hard work done for us...
