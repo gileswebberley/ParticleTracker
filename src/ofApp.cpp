@@ -9,8 +9,9 @@ void ofApp::setup(){
     tracker = new expressionsTrack();
     //to use haar cascades...
     //tracker->setupTrack("haarcascade_upperbody.xml");
+
     //to use difference mode then set the threshold
-    tracker->setupTrack(128);
+    tracker->setupTrack(difference_threshold);
     //ofSetFrameRate(30);
     ofHideCursor();
     ofSetVerticalSync(true);
