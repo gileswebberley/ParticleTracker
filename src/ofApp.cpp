@@ -12,19 +12,18 @@ void ofApp::setup(){
 
     //to use difference mode then set the threshold
     tracker->setupTrack(difference_threshold);
-    //ofSetFrameRate(30);
     ofHideCursor();
     ofSetVerticalSync(true);
-    //ofBackground(255);
     ofSetBackgroundAuto(false);
-    cout<<"...SETUP COMPLETE\n";
 
     // add in the particle system and split it out later to make it more
     //controllable/reusable-------------------------------------------------------
     //the bigger the particles the slower it runs
-    particleSize = 10.0f;
+    //particleSize = 5.0f;
+    //time at startup
     time0 = ofGetElapsedTimef();
-    numParticles = 5000;
+    //try up to 10000
+    //numParticles = 10000;
 
     // Width and Heigth of the windows
     width = ofGetWindowWidth();
@@ -43,8 +42,8 @@ void ofApp::setup(){
         updatePos.load(shadersFolder+"/passthru.vert", shadersFolder+"/posUpdate.frag");// shader for updating the texture that store the particles position on RG channels
         updateVel.load(shadersFolder+"/passthru.vert", shadersFolder+"/velUpdate.frag");// shader for updating the texture that store the particles velocity on RG channels
     }else{
-        updatePos.load("",shadersFolder+"/posUpdate.frag");// shader for updating the texture that store the particles position on RG channels
-        updateVel.load("",shadersFolder+"/velUpdate.frag");// shader for updating the texture that store the particles velocity on RG channels
+        updatePos.load("",shadersFolder+"/posUpdate.frag");// shader for updating the texture that store the particles position on RG channels and elasticity on the B channel
+        updateVel.load("",shadersFolder+"/velUpdate.frag");// shader for updating the texture that store the particles velocity on RG channels and resistance on the B channel
     }
 
     // Frag, Vert and Geo shaders for the rendering process of the spark image
@@ -57,8 +56,8 @@ void ofApp::setup(){
     textureRes = (int)sqrt((float)numParticles);
     numParticles = textureRes * textureRes;
 
-    // 1. Making arrays of float pixels with position information
-    float pos0 = 0.5;
+    //arrays of floats as pixels with position and elasticity information
+    //float pos0 = 0.5;
     vector<float> pos(numParticles*3);
     for (int x = 0; x < textureRes; x++){
         for (int y = 0; y < textureRes; y++){
@@ -67,7 +66,7 @@ void ofApp::setup(){
             pos[i*3 + 0] = pos0;//ofRandom(pos0); //x*offset;
             pos[i*3 + 1] = pos0;//ofRandom(pos0); //y*offset;
             //try to add elasticity
-            pos[i*3 + 2] = ofRandom(0.1,0.5);
+            pos[i*3 + 2] = ofRandom(elasMin,elasMax);
         }
     }
     // Load this information in to the FBO's texture
@@ -76,8 +75,8 @@ void ofApp::setup(){
     posPingPong.dst->getTexture().loadData(pos.data(), textureRes, textureRes, GL_RGB);
 
 
-    // 2. Making arrays of float pixels with velocity information and the load it to a texture
-    float velScale = 0.4;
+    // arrays of float pixels with velocity and resistance information
+    //float velScale = 0.4;
     vector<float> vel(numParticles*3);
     for (int i = 0; i < numParticles; i++){
         vel[i*3 + 0] = ofRandom(-velScale,velScale);
@@ -113,6 +112,7 @@ void ofApp::setup(){
         }
     }
 
+    cout<<"...SETUP COMPLETE\n";
 }
 
 //--------------------------------------------------------------
@@ -133,13 +133,15 @@ void ofApp::update(){
         if(track0.y <= 0) track0.y = mouseY;//2;
 
         //add in the particle system stuff--------------------------------------------
-        //start 'recording' the destination buffer
+        //start 'recording' the velocity destination buffer
         velPingPong.dst->begin();
+
         ofClear(0);
         timeStep = ofGetElapsedTimef() - time0;
         time0 = ofGetElapsedTimef();
         //start shader, working on the source buffer
         updateVel.begin();
+
         // passing the previus velocity information
         updateVel.setUniformTexture("backbuffer", velPingPong.src->getTexture(), 0);
         // passing the position information
@@ -154,6 +156,7 @@ void ofApp::update(){
         velPingPong.src->draw(0, 0);
 
         updateVel.end();
+
         velPingPong.dst->end();
         //...then make dst fbo into the src fbo by swapping the pointers
         velPingPong.swap();
@@ -164,8 +167,10 @@ void ofApp::update(){
         // With the velocity calculated updates the position
         //
         posPingPong.dst->begin();
+
         ofClear(0);
         updatePos.begin();
+
         updatePos.setUniformTexture("prevPosData", posPingPong.src->getTexture(), 0); // Previus position
         updatePos.setUniformTexture("velData", velPingPong.src->getTexture(), 1);  // Velocity
         updatePos.setUniform1f("timestep",(float) timeStep );
@@ -189,7 +194,7 @@ void ofApp::update(){
         // 3.   that then on the Fragment Shader is going to be filled with the pixels of sparkImg texture
         //
         renderFBO.begin();
-        ofClear(0,0,0,0);
+        ofClear(bgColour);
         updateRender.begin();
         updateRender.setUniformTexture("posTex", posPingPong.dst->getTexture(), 0);
         updateRender.setUniformTexture("sparkTex", sparkImg.getTexture() , 1);

@@ -73,11 +73,22 @@ public:
     ofImage sparkImg;
 
     float   timeStep,time0;
-    float   particleSize;
-
+    ofColor bgColour{255};
+    //width and height of the window set in setup
     int     width, height;
+    //width and height of the particle image
     int     imgWidth, imgHeight;
-    int     numParticles;
+    //total number of particles in the system
+    int     numParticles{10000};
+    //the bigger the particle the slower it runs
+    float   particleSize{5.0f};
+    //initial x/y position max
+    float pos0{0.5};
+    //elasticity max and min
+    float elasMin{0.1},elasMax{0.5};
+    //maximum velocity and then min and max resistance
+    float velScale{0.4},resistMin{0.3},resistMax{0.99};
+
     int     textureRes;
 
 
