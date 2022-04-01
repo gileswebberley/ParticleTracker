@@ -16,7 +16,8 @@ TrackBlob::~TrackBlob()
 void TrackBlob::updateTrackBlob(ofPoint p, int w = 1, int h = 1)
 {
     if(dying){
-        gracefulKill();
+        killTrackBlob();
+        //gracefulKill();
         return;
     }
     if(!getInit()){
@@ -51,6 +52,7 @@ void TrackBlob::killTrackBlob()
     }//else
     if(dying){
         gracefulKill();
+        //is_init = false;
     }
 }
 
@@ -61,7 +63,7 @@ void TrackBlob::gracefulKill()
 //        cout<<"dying....\n";
         ++dyingDuration;
     }else{
-        cout<<"blob is dead/n/n";
+        cout<<"blob is dead\n\n";
         dyingDuration = 0;
         pos = {0,0};
         rawPos = pos;

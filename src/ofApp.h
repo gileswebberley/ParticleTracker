@@ -46,32 +46,31 @@ private:
 
 class ofApp : public ofBaseApp{
 
-    //int grabW{640}, grabH{480};
-    bool draw_delay{true};
-    int track_delay_time{5};
-    int difference_threshold{128};
 
 public:
-    //create new in setup()
-    expressionsTrack* tracker;
     void setup();
     void update();
     void draw();
 
     void keyPressed(int key);
 
+private:
+    //the target tracker, create new in setup()
+    expressionsTrack* tracker;
+    //int grabW{640}, grabH{480};
+    bool draw_delay{true};
+    int track_delay_time{5};
+    int difference_threshold{128};
+
     //add in the particle system...
     ofShader    updatePos;
     ofShader    updateVel;
     ofShader    updateRender;
-
     pingPongBuffer posPingPong;
     pingPongBuffer velPingPong;
-
     ofFbo   renderFBO;
-
     ofImage sparkImg;
-
+    string imageFile{"droplet2.png"};
     float   timeStep,time0;
     ofColor bgColour{255};
     //width and height of the window set in setup

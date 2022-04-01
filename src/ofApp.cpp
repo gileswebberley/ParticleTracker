@@ -18,12 +18,8 @@ void ofApp::setup(){
 
     // add in the particle system and split it out later to make it more
     //controllable/reusable-------------------------------------------------------
-    //the bigger the particles the slower it runs
-    //particleSize = 5.0f;
     //time at startup
     time0 = ofGetElapsedTimef();
-    //try up to 10000
-    //numParticles = 10000;
 
     // Width and Heigth of the windows
     width = ofGetWindowWidth();
@@ -39,8 +35,8 @@ void ofApp::setup(){
 
     // Loading the Shaders
     if(ofIsGLProgrammableRenderer()){
-        updatePos.load(shadersFolder+"/passthru.vert", shadersFolder+"/posUpdate.frag");// shader for updating the texture that store the particles position on RG channels
-        updateVel.load(shadersFolder+"/passthru.vert", shadersFolder+"/velUpdate.frag");// shader for updating the texture that store the particles velocity on RG channels
+        updatePos.load(shadersFolder+"/passthru.vert", shadersFolder+"/posUpdate.frag");// shader for updating the texture that store the particles position and elasticity on RGB channels
+        updateVel.load(shadersFolder+"/passthru.vert", shadersFolder+"/velUpdate.frag");// shader for updating the texture that store the particles velocity and resistance on RGB channels
     }else{
         updatePos.load("",shadersFolder+"/posUpdate.frag");// shader for updating the texture that store the particles position on RG channels and elasticity on the B channel
         updateVel.load("",shadersFolder+"/velUpdate.frag");// shader for updating the texture that store the particles velocity on RG channels and resistance on the B channel
@@ -82,7 +78,7 @@ void ofApp::setup(){
         vel[i*3 + 0] = ofRandom(-velScale,velScale);
         vel[i*3 + 1] = ofRandom(-velScale,velScale);
         //try to add resistance
-        vel[i*3 + 2] = ofRandom(0.3,0.99);
+        vel[i*3 + 2] = ofRandom(resistMin,resistMax);
     }
     // Load this information in to the FBO's texture
     velPingPong.allocate(textureRes, textureRes, GL_RGB32F, GL_LINEAR);
@@ -90,7 +86,7 @@ void ofApp::setup(){
     velPingPong.dst->getTexture().loadData(vel.data(), textureRes, textureRes, GL_RGB);
 
     // Loading and setings of the variables of the textures of the particles
-    sparkImg.load("droplet2.png");
+    sparkImg.load(imageFile);
     imgWidth = sparkImg.getWidth();
     imgHeight = sparkImg.getHeight();
 
@@ -100,122 +96,132 @@ void ofApp::setup(){
     ofClear(0, 0, 0, 255);
     renderFBO.end();
 
-
+    //Add all of the points to the ofVboMesh object that reflect
+    //each of the textures we produced with velocity etc
     mesh.setMode(OF_PRIMITIVE_POINTS);
-//    glPointSize(10);
     for(int x = 0; x < textureRes; x++){
         for(int y = 0; y < textureRes; y++){
-
             mesh.addVertex({x,y,0});
             mesh.addTexCoord({x, y});
-            mesh.addColor(ofFloatColor(0,ofRandom(0.1,0.8),((y+128)%255)/255.0));
+            mesh.addColor(ofFloatColor((((x+128)%255)/255.0),ofRandom(0.1,0.8),((y+128)%255)/255.0));
         }
     }
 
     cout<<"...SETUP COMPLETE\n";
 }
 
-//--------------------------------------------------------------
+//---------------------------UPDATE()-----------------------
 void ofApp::update(){
-    //tracker->doFinding();
-        static int cntr = 0;
-        static ofPoint track0;
-        if(cntr < track_delay_time){
-            draw_delay = true;
-            cntr++;
-        }else{
-            tracker->doFinding();
-            draw_delay = false;
-            cntr = 0;
-            track0 = tracker->getClosestPoint(track0);
-        }
-        if(track0.x <= 0) track0.x = mouseX;//2;
-        if(track0.y <= 0) track0.y = mouseY;//2;
+    //do the tracking to get a target point
+    //use static variables so they persist between calls
+    //they must be in the scope of the update() method
+    //and initialised inline (ie not in the header file unless const)
+    static int cntr{0};
+    static ofPoint track0{0.0f,0.0f};
+    if(cntr < track_delay_time){
+        draw_delay = true;
+        cntr++;
+    }else{
+        tracker->doFinding();
+        draw_delay = false;
+        cntr = 0;
+        track0 = tracker->getClosestPoint(track0);
+    }
+    if(track0.x <= 0) track0.x = mouseX;//2;
+    if(track0.y <= 0) track0.y = mouseY;//2;
 
-        //add in the particle system stuff--------------------------------------------
-        //start 'recording' the velocity destination buffer
-        velPingPong.dst->begin();
+    //add in the particle system stuff--------------------------------------------
+    //start 'recording' the velocity destination buffer
+    velPingPong.dst->begin();
+    ofClear(0);
 
-        ofClear(0);
-        timeStep = ofGetElapsedTimef() - time0;
-        time0 = ofGetElapsedTimef();
-        //start shader, working on the source buffer
-        updateVel.begin();
+    //timestep is passed to the gpu for smooth animation
+    timeStep = ofGetElapsedTimef() - time0;
+    time0 = ofGetElapsedTimef();
 
-        // passing the previus velocity information
-        updateVel.setUniformTexture("backbuffer", velPingPong.src->getTexture(), 0);
-        // passing the position information
-        updateVel.setUniformTexture("posData", posPingPong.src->getTexture(), 1);
-        updateVel.setUniform1i("resolution", (int)textureRes);
-        //pass in the target position
-        updateVel.setUniform2f("screen", (float)track0.x/width, (float)track0.y/height);
-        updateVel.setUniform1f("timestep", (float)timeStep);
+    //start velocity shader, working on the source buffer
+    updateVel.begin();
 
-        // draw the source velocity texture to be updated, this is where src is
-        //processed by the shader and drawn into the dst fbo
-        velPingPong.src->draw(0, 0);
+    // passing the previous velocity information
+    updateVel.setUniformTexture("backbuffer", velPingPong.src->getTexture(), 0);
+    // passing the position information
+    updateVel.setUniformTexture("posData", posPingPong.src->getTexture(), 1);
+    //use setUniform1i to pass in an integer
+    updateVel.setUniform1i("resolution", (int)textureRes);
+    //pass in the target position as 2 floats, hence the setUniform2f
+    updateVel.setUniform2f("screen", (float)track0.x/width, (float)track0.y/height);
+    //pass in the current timestep as one float value
+    updateVel.setUniform1f("timestep", (float)timeStep);
 
-        updateVel.end();
+    // draw the source velocity texture to be updated, this is where src is
+    //processed by the shader and drawn into the dst fbo
+    velPingPong.src->draw(0, 0);
 
-        velPingPong.dst->end();
-        //...then make dst fbo into the src fbo by swapping the pointers
-        velPingPong.swap();
+    //end communication with the shader
+    updateVel.end();
+
+    //now the shader has drawn the changes into the "destination" ofFbo
+    velPingPong.dst->end();
+
+    //...then make dst fbo into the src fbo by swapping the pointers
+    velPingPong.swap();
+
+    //start "recording" the position destination buffer
+    posPingPong.dst->begin();
+    ofClear(0);
+
+    //start position shader, working with the src buffer
+    updatePos.begin();
+
+    //pass in the last position information
+    updatePos.setUniformTexture("prevPosData", posPingPong.src->getTexture(), 0);
+    //now pass in the velocity information that we just worked out above
+    updatePos.setUniformTexture("velData", velPingPong.src->getTexture(), 1);
+    //and finally the timestep
+    updatePos.setUniform1f("timestep",(float) timeStep );
+
+    // draw the source position texture to be updated by the shaders
+    posPingPong.src->draw(0, 0);
+
+    updatePos.end();
+    posPingPong.dst->end();
+
+    posPingPong.swap();
 
 
-        // Positions PingPong
-        //
-        // With the velocity calculated updates the position
-        //
-        posPingPong.dst->begin();
+    // Rendering
+    //
+    // 1.   Sending this vertex to the Vertex Shader.
+    //      Each one it's draw exactly on the position that match where it's stored on both vel and pos textures
+    //      So on the Vertex Shader (that's first in the pipeline) can search for it information and move it
+    //      to it right position.
+    // 2.   Once it's in the right place the Geometry Shader make 6 more vertex in order to make a billboard
+    // 3.   that then on the Fragment Shader is going to be filled with the pixels of sparkImg texture
+    //
+    renderFBO.begin();
+    //this is where the background colour is set
+    ofClear(bgColour);
+    updateRender.begin();
+    updateRender.setUniformTexture("posTex", posPingPong.src->getTexture(), 0);
+    updateRender.setUniformTexture("sparkTex", sparkImg.getTexture() , 1);
+    updateRender.setUniform1i("resolution", (float)textureRes);
+    updateRender.setUniform2f("screen", (float)width, (float)height);
+    updateRender.setUniform1f("size", (float)particleSize);
+    updateRender.setUniform1f("imgWidth", imgWidth);
+    updateRender.setUniform1f("imgHeight", imgHeight);
 
-        ofClear(0);
-        updatePos.begin();
+    ofPushStyle();
+    ofEnableBlendMode( OF_BLENDMODE_ALPHA );
+    //ofSetColor(255);
+    //draw the mesh through the rendering shaders
+    mesh.drawFaces();
 
-        updatePos.setUniformTexture("prevPosData", posPingPong.src->getTexture(), 0); // Previus position
-        updatePos.setUniformTexture("velData", velPingPong.src->getTexture(), 1);  // Velocity
-        updatePos.setUniform1f("timestep",(float) timeStep );
+    ofDisableBlendMode();
+    glEnd();
 
-        // draw the source position texture to be updated by the shaders
-        posPingPong.src->draw(0, 0);
-
-        updatePos.end();
-        posPingPong.dst->end();
-
-        posPingPong.swap();
-
-
-        // Rendering
-        //
-        // 1.   Sending this vertex to the Vertex Shader.
-        //      Each one it's draw exactly on the position that match where it's stored on both vel and pos textures
-        //      So on the Vertex Shader (that's is first at the pipeline) can search for it information and move it
-        //      to it right position.
-        // 2.   Once it's in the right place the Geometry Shader make 6 more vertex in order to make a billboard
-        // 3.   that then on the Fragment Shader is going to be filled with the pixels of sparkImg texture
-        //
-        renderFBO.begin();
-        ofClear(bgColour);
-        updateRender.begin();
-        updateRender.setUniformTexture("posTex", posPingPong.dst->getTexture(), 0);
-        updateRender.setUniformTexture("sparkTex", sparkImg.getTexture() , 1);
-        updateRender.setUniform1i("resolution", (float)textureRes);
-        updateRender.setUniform2f("screen", (float)width, (float)height);
-        updateRender.setUniform1f("size", (float)particleSize);
-        updateRender.setUniform1f("imgWidth", imgWidth);
-        updateRender.setUniform1f("imgHeight", imgHeight);
-
-        ofPushStyle();
-        ofEnableBlendMode( OF_BLENDMODE_ALPHA );
-        //ofSetColor(255);
-        //draw the mesh through the rendering shaders
-        mesh.drawFaces();
-
-        ofDisableBlendMode();
-        glEnd();
-
-        updateRender.end();
-        renderFBO.end();
-        ofPopStyle();
+    updateRender.end();
+    renderFBO.end();
+    ofPopStyle();
 }
 
 //--------------------------------------------------------------

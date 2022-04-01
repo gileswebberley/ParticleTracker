@@ -96,7 +96,7 @@ bool expressionsTrack::doFinding()
                 //def. left the tracking...
                 trackBlobs.at(maxBlobCnt-1).killTrackBlob();
                 killCnt = 0;
-                maxBlobCnt = blobCnt;
+                maxBlobCnt -= 1;//this has fixed some blobs not dying
             }
             //return false;
         }else{
