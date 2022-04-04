@@ -14,12 +14,15 @@ class TrackBlob
     bool is_init{false}, dying{false};
     //rawPos is not processed so will be the actual position in the video feed
     ofPoint pos{0,0}, rawPos{0,0};
+    float tb_area{0.0f};
 
 public:
     TrackBlob();
     TrackBlob(int w, int h);
     ~TrackBlob();
     void updateTrackBlob(ofPoint p, int w, int h);
+    void setArea(float a){tb_area = a;}
+    float getArea(){return tb_area;}
     void killTrackBlob();
     bool getInit();
     void gracefulKill();

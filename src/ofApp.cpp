@@ -6,12 +6,12 @@
 //--------------------------------------------------------------
 void ofApp::setup(){
     cout<<"IN SETUP....\n";
-    tracker = new expressionsTrack();
+    tracker = new expressionsTrack(difference_threshold);
     //to use haar cascades...
     //tracker->setupTrack("haarcascade_upperbody.xml");
 
     //to use difference mode then set the threshold
-    tracker->setupTrack(difference_threshold);
+    //tracker->setupTrack(difference_threshold);
     ofHideCursor();
     ofSetVerticalSync(true);
     ofSetBackgroundAuto(false);
@@ -125,7 +125,7 @@ void ofApp::update(){
         tracker->doFinding();
         draw_delay = false;
         cntr = 0;
-        track0 = tracker->getClosestPoint(track0);
+        track0 = (track_largest)? tracker->getLargestPoint() : tracker->getClosestPoint(track0);
     }
     if(track0.x <= 0) track0.x = mouseX;//2;
     if(track0.y <= 0) track0.y = mouseY;//2;

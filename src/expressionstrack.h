@@ -25,20 +25,22 @@ class expressionsTrack
     //size for the grabber etc
     int grabW{352}, grabH{288};
     //the minimum blob area to be registered in findContours()
-    float minBlobArea = (grabW*grabH)*0.005;
+    float minBlobArea = (grabW*grabH)*0.003;
     //the maximum blob area to be registered in findContours()
-    float maxBlobArea = (grabW*grabH)*0.5;
-    //difference threshold for tracking
-    int diff_threshold{200};
+    float maxBlobArea = (grabW*grabH)*0.05;
+    //difference threshold for tracking default, set with setUpTrack(int)
+    int diff_threshold{100};
     //if using diff method is the background image set
     bool diffbgset{false},diff_mode{false};
-    ofColor bgcolour{255,255,255};
-    int fadeAmount{60};
 
 public:
+
     expressionsTrack();
-    //constructor that calls setupTrack
+    //constructors that call setupTrack()
+    //for a haar cascade tracker
     expressionsTrack(string haarFilepath);
+    //for a difference tracker
+    expressionsTrack(int diff_thresh);
     //if we have ptrs around we need to clear up after ourselves
     ~expressionsTrack();
     //initialisation function...
@@ -53,10 +55,16 @@ public:
     vector<ofPoint> getCentrePoints();
     //in use I want to get one point that is the closest to the last one
     ofPoint getClosestPoint(ofPoint point);
+    //to get the trackblob with the largest area
+    ofPoint getLargestPoint();
     //so I can test and tweak see what the camera is seeing
     void drawInput();
     //I failed in making this work as I hoped :(
     ofPoint getGrabWH(){return ofPoint{(float)grabW,(float)grabH};}
+
+private:
+
+
 };
 
 #endif // EXPRESSIONSTRACK_H

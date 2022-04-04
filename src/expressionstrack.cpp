@@ -8,14 +8,21 @@ expressionsTrack::expressionsTrack()
 {
     //set the live video device up with inputSelector
     vidIn.setupInput(grabW,grabH);
-    cout<<"Constructor of tracker\n";
+    cout<<"Constructor of difference tracker\n";
 }
 
 expressionsTrack::expressionsTrack(string haarpath)
 {
-    cout<<"Constructor of tracker\n";
+    cout<<"Constructor of haar cascade tracker\n";
     vidIn.setupInput(grabW,grabH);
     setupTrack(haarpath);
+}
+
+expressionsTrack::expressionsTrack(int diff_thresh)
+{
+    cout<<"Constructor of haar cascade tracker\n";
+    vidIn.setupInput(grabW,grabH);
+    setupTrack(diff_thresh);
 }
 
 expressionsTrack::~expressionsTrack()
@@ -26,7 +33,7 @@ expressionsTrack::~expressionsTrack()
 }
 
 //setup function for difference tracking method
-bool expressionsTrack::setupTrack(int diffThreshold)
+bool expressionsTrack::setupTrack(int diffThreshold = 128)
 {
     diff_threshold = (abs(diffThreshold)>254)?254:abs(diffThreshold);
     grayimg.allocate(grabW,grabH);
@@ -51,7 +58,7 @@ bool expressionsTrack::setupTrack(string haarpath)
     grayimg.allocate(grabW,grabH);
     //not drawing so using the texture makes it more efficient I think
     grayimg.setUseTexture(true);
-    bgcolour.a = fadeAmount;
+    //bgcolour.a = fadeAmount;
     trackBlobs.assign(maxBlobs,TrackBlob(grabW,grabH));
     return true;
 }
@@ -66,22 +73,20 @@ bool expressionsTrack::doFinding()
         rgbimg.setFromPixels(vidIn.getPixelRead());
         grayimg.setFromColorImage(rgbimg);
         grayimg.contrastStretch();
-        if(!diffbgset && diff_mode){
-            graybg = grayimg;
-            diffbgset = true;
-            cout<<"difference background image has been set....\n";
-            //there'll be no diff as it's just been set so...
-            return false;
-        }
         if(diff_mode){
-            grayabs.absDiff(graybg,grayimg);
-            graybg = grayimg;
-//            grayimg -= graybg;
-//            grayabs = grayimg;
-            grayabs.contrastStretch();
-            grayabs.threshold(diff_threshold);
-            grayabs.blur(5);
-            contours.findContours(grayabs,minBlobArea,maxBlobArea,maxBlobs,false);
+            if(!diffbgset){
+                graybg = grayimg;
+                diffbgset = true;
+                cout<<"difference background image has been set....\n";
+                //there'll be no diff as it's just been set so...
+                return false;
+            }
+            grayabs.absDiff(graybg,grayimg);//the difference between the last fram and this one
+            graybg = grayimg;//set last one as this one for the next loop
+            grayabs.contrastStretch();//adds exposure noise so get rid of?
+            grayabs.threshold(diff_threshold);//create a binary(blk or wht) image
+            grayabs.blur(5);//blur to get rid of some noise
+            contours.findContours(grayabs,minBlobArea,maxBlobArea,maxBlobs,false);//then find the white areas in the difference image
             blobCnt = contours.blobs.size();
         }else{
             //all the hard work done for us...
@@ -111,8 +116,11 @@ bool expressionsTrack::doFinding()
             //cout<<"blob #"<<i<<"\n";
             ofRectangle bb = (diff_mode)? contours.blobs[i].boundingRect:finder.blobs[i].boundingRect;
             ofPoint cp = (diff_mode)? contours.blobs[i].centroid : finder.blobs[i].centroid;
+            float ar =(diff_mode)?contours.blobs[i].area : finder.blobs[i].area;
             //it seems to remain in order so each tracker should be the same object
             trackBlobs.at(i).updateTrackBlob(cp, bb.width, bb.height);
+            //added functionality for tracking the largest blob
+            trackBlobs.at(i).setArea(ar);
         }
         return true;
     }
@@ -138,6 +146,21 @@ ofPoint expressionsTrack::getClosestPoint(ofPoint point)
     }
     //cout<<"CLOSEST POINT TO :"<<point.x<<"/"<<point.y<<" is "<<retPt.x<<"/"<<retPt.y<<"\n";
     return retPt;
+}
+
+ofPoint expressionsTrack::getLargestPoint(){
+    float largest{0};
+    int index{0};
+    for(int i=0; i<maxBlobs; i++){
+        if(trackBlobs.at(i).getInit()){
+            float this_area = trackBlobs.at(i).getArea();
+            if(this_area>largest){
+                index = i;
+                largest = this_area;
+            }
+        }
+    }
+    return trackBlobs.at(index).getCentrePoint();
 }
 
 vector<ofPoint> expressionsTrack::getCentrePoints()

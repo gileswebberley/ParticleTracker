@@ -58,9 +58,9 @@ private:
     //the target tracker, create new in setup()
     expressionsTrack* tracker;
     //int grabW{640}, grabH{480};
-    bool draw_delay{true};
+    bool draw_delay{true}, track_largest{true};//track_closest is default when this is false
     int track_delay_time{5};
-    int difference_threshold{128};
+    int difference_threshold{148};
 
     //add in the particle system...
     ofShader    updatePos;
@@ -78,7 +78,7 @@ private:
     //width and height of the particle image
     int     imgWidth, imgHeight;
     //total number of particles in the system
-    int     numParticles{10000};
+    int     numParticles{15000};
     //the bigger the particle the slower it runs
     float   particleSize{5.0f};
     //initial x/y position max
@@ -86,10 +86,9 @@ private:
     //elasticity max and min
     float elasMin{0.1},elasMax{0.5};
     //maximum velocity and then min and max resistance
-    float velScale{0.4},resistMin{0.3},resistMax{0.99};
+    float velScale{0.2},resistMin{0.3},resistMax{0.99};
 
     int     textureRes;
-
 
     ofVboMesh mesh;
 
