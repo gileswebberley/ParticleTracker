@@ -84,7 +84,7 @@ private:
     //initial x/y position max
     float pos0{0.5};
     //elasticity max and min
-    float elasMin{0.1},elasMax{0.5};
+    float elasMin{0.1},elasMax{0.3};
     //maximum velocity and then min and max resistance
     float velScale{0.2},resistMin{0.3},resistMax{0.99};
 

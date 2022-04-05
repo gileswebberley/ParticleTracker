@@ -6,16 +6,14 @@
 //--------------------------------------------------------------
 void ofApp::setup(){
     cout<<"IN SETUP....\n";
+    //to use difference mode then set the threshold
     tracker = new expressionsTrack(difference_threshold);
     //to use haar cascades...
-    //tracker->setupTrack("haarcascade_upperbody.xml");
-
-    //to use difference mode then set the threshold
-    //tracker->setupTrack(difference_threshold);
+    //tracker = new expressionsTrack("haarcascade_upperbody.xml");
     ofHideCursor();
     ofSetVerticalSync(true);
     ofSetBackgroundAuto(false);
-
+    ofSetFrameRate(60);
     // add in the particle system and split it out later to make it more
     //controllable/reusable-------------------------------------------------------
     //time at startup
@@ -231,8 +229,8 @@ void ofApp::draw(){
     ofBackground(28);
     //now draw the rendered particle system
     renderFBO.draw(0,0);
-    tracker->drawInput();//for framing
-    tracker->drawFindings();//to see tracking boxes
+    //tracker->drawInput();//for framing
+    //tracker->drawFindings();//to see tracking boxes
 }
 
 //--------------------------------------------------------------

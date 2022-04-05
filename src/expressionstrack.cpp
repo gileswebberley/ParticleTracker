@@ -8,7 +8,8 @@ expressionsTrack::expressionsTrack()
 {
     //set the live video device up with inputSelector
     vidIn.setupInput(grabW,grabH);
-    cout<<"Constructor of difference tracker\n";
+    setupTrack(diff_threshold);
+    cout<<"Constructor of default difference tracker\n";
 }
 
 expressionsTrack::expressionsTrack(string haarpath)
@@ -20,7 +21,7 @@ expressionsTrack::expressionsTrack(string haarpath)
 
 expressionsTrack::expressionsTrack(int diff_thresh)
 {
-    cout<<"Constructor of haar cascade tracker\n";
+    cout<<"Constructor of difference tracker\n";
     vidIn.setupInput(grabW,grabH);
     setupTrack(diff_thresh);
 }
@@ -33,7 +34,7 @@ expressionsTrack::~expressionsTrack()
 }
 
 //setup function for difference tracking method
-bool expressionsTrack::setupTrack(int diffThreshold = 128)
+bool expressionsTrack::setupTrack(int diffThreshold)
 {
     diff_threshold = (abs(diffThreshold)>254)?254:abs(diffThreshold);
     grayimg.allocate(grabW,grabH);
