@@ -57,10 +57,11 @@ void ofApp::setup(){
         for (int y = 0; y < textureRes; y++){
             int i = textureRes * y + x;
             //width and height * offset [0.0...1.0]
-            pos[i*3 + 0] = x/textureRes;//pos0;//ofRandom(pos0); //x*offset;
-            pos[i*3 + 1] = y/textureRes;//pos0;//ofRandom(pos0); //y*offset;
+            pos[i*3 + 0] = (float)x/textureRes;//pos0;//ofRandom(pos0); //x*offset;
+            pos[i*3 + 1] = (float)y/textureRes;//pos0;//ofRandom(pos0); //y*offset;
             //try to add elasticity
             pos[i*3 + 2] = ofRandom(elasMin,elasMax);
+            //cout<<"x: "<<pos[i*3+0]<<" y: "<<pos[i*3+1]<<"\n";
         }
     }
     // Load this information in to the FBO's texture

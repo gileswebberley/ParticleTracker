@@ -63,6 +63,8 @@ private:
     int difference_threshold{148};
 
     //add in the particle system...
+    //original positions
+    ofTexture original_pos;
     ofShader    updatePos;
     ofShader    updateVel;
     ofShader    updateRender;
