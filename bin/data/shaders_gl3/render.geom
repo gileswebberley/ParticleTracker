@@ -25,6 +25,7 @@ void main(void){
     for(int i = 0; i < gl_in.length(); i++){
         //for each vertex pass on the colour to frag shader set via mesh.addColor()
         gColor = vColor[i];
+        //now layout the first of two triangles that make up the rectangle to render the image within
 gl_Position = modelViewProjectionMatrix * ( vPosition[i] + vec4(-size,-size,0.0,0.0));
         vTexCoord.x = 0.0;
         vTexCoord.y = 0.0;
@@ -40,7 +41,7 @@ gl_Position = modelViewProjectionMatrix * ( vPosition[i] + vec4(-size,-size,0.0,
         vTexCoord.y = imgHeight;
         EmitVertex();
         EndPrimitive();
-
+        //and then the second triangle
         gl_Position = modelViewProjectionMatrix * (vPosition[i] + vec4(-size,-size,0.0,0.0));
         vTexCoord.x = 0.0;
         vTexCoord.y = 0.0;

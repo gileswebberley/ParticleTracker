@@ -1,7 +1,6 @@
 #version 150
 
-// This fill the billboard made on the Geometry Shader with a texture
-
+//sparkTex is the image texture that is attached to the particles
 uniform sampler2DRect sparkTex;
 
 in vec2 vTexCoord;
@@ -14,6 +13,5 @@ void main() {
 //    vec3 myColor = texture(vColor, vTexCoord).rgb;
     vec4 myTex = texture(sparkTex, vTexCoord).rgba;
     myTex.rgb *= gColor.rgb;
-    vFragColor = myTex;//vec4(myTex.rgb,0.5);
-//    vFragColor = texture(vColor, vTexCoord);
+    vFragColor = myTex;
 }

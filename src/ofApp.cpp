@@ -57,8 +57,8 @@ void ofApp::setup(){
         for (int y = 0; y < textureRes; y++){
             int i = textureRes * y + x;
             //width and height * offset [0.0...1.0]
-            pos[i*3 + 0] = pos0;//ofRandom(pos0); //x*offset;
-            pos[i*3 + 1] = pos0;//ofRandom(pos0); //y*offset;
+            pos[i*3 + 0] = x/textureRes;//pos0;//ofRandom(pos0); //x*offset;
+            pos[i*3 + 1] = y/textureRes;//pos0;//ofRandom(pos0); //y*offset;
             //try to add elasticity
             pos[i*3 + 2] = ofRandom(elasMin,elasMax);
         }
@@ -67,6 +67,8 @@ void ofApp::setup(){
     posPingPong.allocate(textureRes, textureRes, GL_RGB32F);
     posPingPong.src->getTexture().loadData(pos.data(), textureRes, textureRes, GL_RGB);
     posPingPong.dst->getTexture().loadData(pos.data(), textureRes, textureRes, GL_RGB);
+    //and save into the original positions texture
+    original_pos.loadData(pos.data(),textureRes,textureRes,GL_RGB);
 
 
     // arrays of float pixels with velocity and resistance information
@@ -101,6 +103,7 @@ void ofApp::setup(){
         for(int y = 0; y < textureRes; y++){
             mesh.addVertex({x,y,0});
             mesh.addTexCoord({x, y});
+            //this colour is passed through to the shader pipeline, appears as gl_color I think
             mesh.addColor(ofFloatColor((((x+128)%255)/255.0),ofRandom(0.1,0.8),((y+128)%255)/255.0));
         }
     }
