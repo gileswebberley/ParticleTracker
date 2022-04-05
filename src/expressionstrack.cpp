@@ -72,6 +72,7 @@ bool expressionsTrack::doFinding()
     if(vidIn.updateInput()){
         //set using a reference to the pixel data of the video
         rgbimg.setFromPixels(vidIn.getPixelRead());
+        rgbimg.dilate();
         grayimg.setFromColorImage(rgbimg);
         grayimg.contrastStretch();
         if(diff_mode){

@@ -65,6 +65,8 @@ private:
     //add in the particle system...
     //original positions
     ofTexture original_pos;
+    ofImage reference;
+    string referenceFile{"reference_face.jpg"};
     ofShader    updatePos;
     ofShader    updateVel;
     ofShader    updateRender;
@@ -84,7 +86,7 @@ private:
     //the bigger the particle the slower it runs
     float   particleSize{5.0f};
     //initial x/y position max
-    float pos0{0.5};
+    //float pos0{0.5};
     //elasticity max and min
     float elasMin{0.1},elasMax{0.3};
     //maximum velocity and then min and max resistance

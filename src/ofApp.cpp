@@ -49,6 +49,8 @@ void ofApp::setup(){
     // Seting the textures where the information ( position and velocity ) will be
     textureRes = (int)sqrt((float)numParticles);
     numParticles = textureRes * textureRes;
+    reference.load(referenceFile);
+    reference.resize(textureRes,textureRes);
 
     //arrays of floats as pixels with position and elasticity information
     //float pos0 = 0.5;
@@ -57,8 +59,9 @@ void ofApp::setup(){
         for (int y = 0; y < textureRes; y++){
             int i = textureRes * y + x;
             //width and height * offset [0.0...1.0]
-            pos[i*3 + 0] = (float)x/textureRes;//pos0;//ofRandom(pos0); //x*offset;
-            pos[i*3 + 1] = (float)y/textureRes;//pos0;//ofRandom(pos0); //y*offset;
+            //now they are positioned as born we can use a reference picture to set the colours, then hopefully make it reform the picture when it has nothing to track??
+            pos[i*3 + 0] = (float)x/textureRes;
+            pos[i*3 + 1] = (float)y/textureRes;
             //try to add elasticity
             pos[i*3 + 2] = ofRandom(elasMin,elasMax);
             //cout<<"x: "<<pos[i*3+0]<<" y: "<<pos[i*3+1]<<"\n";
@@ -105,7 +108,8 @@ void ofApp::setup(){
             mesh.addVertex({x,y,0});
             mesh.addTexCoord({x, y});
             //this colour is passed through to the shader pipeline, appears as gl_color I think
-            mesh.addColor(ofFloatColor((((x+128)%255)/255.0),ofRandom(0.1,0.8),((y+128)%255)/255.0));
+            //mesh.addColor(ofFloatColor((((x+128)%255)/255.0),ofRandom(0.1,0.8),((y+128)%255)/255.0));
+            mesh.addColor(ofFloatColor(reference.getColor(x,y)));
         }
     }
 
@@ -129,8 +133,8 @@ void ofApp::update(){
         cntr = 0;
         track0 = (track_largest)? tracker->getLargestPoint() : tracker->getClosestPoint(track0);
     }
-    if(track0.x <= 0) track0.x = mouseX;//2;
-    if(track0.y <= 0) track0.y = mouseY;//2;
+    //if(track0.x <= 0) cout<<"track0.x is 0\n";//track0.x = mouseX;//2;
+    //if(track0.y <= 0) cout<<"track0.y is 0\n";//track0.y = mouseY;//2;
 
     //add in the particle system stuff--------------------------------------------
     //start 'recording' the velocity destination buffer
@@ -148,6 +152,8 @@ void ofApp::update(){
     updateVel.setUniformTexture("backbuffer", velPingPong.src->getTexture(), 0);
     // passing the position information
     updateVel.setUniformTexture("posData", posPingPong.src->getTexture(), 1);
+    //trying to implement going back to original positions if nothing to track
+    updateVel.setUniformTexture("originalPos", original_pos,2);
     //use setUniform1i to pass in an integer
     updateVel.setUniform1i("resolution", (int)textureRes);
     //pass in the target position as 2 floats, hence the setUniform2f
