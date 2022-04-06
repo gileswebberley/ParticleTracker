@@ -40,6 +40,7 @@ bool expressionsTrack::setupTrack(int diffThreshold)
     grayimg.allocate(grabW,grabH);
     graybg.allocate(grabW,grabH);
     grayabs.allocate(grabW,grabH);
+    rgbimg.allocate(grabW,grabH);
     diff_mode = true;
     trackBlobs.assign(maxBlobs,TrackBlob(grabW,grabH));
     return diff_mode;
@@ -55,6 +56,7 @@ bool expressionsTrack::setupTrack(string haarpath)
     //to reduce false positives this is how many rectangles
     //make up a group big enough to count as a real find
     finder.setNeighbors(3);
+    rgbimg.allocate(grabW,grabH);
 
     grayimg.allocate(grabW,grabH);
     //not drawing so using the texture makes it more efficient I think

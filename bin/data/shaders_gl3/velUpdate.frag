@@ -26,10 +26,10 @@ void main(void){
         targetV = orig.xy - pos.xy;
         //make it a unit vector by dividing by it's magnitude |v|
         targetV /= distance(orig.xy,pos.xy);
-        elasticity = 0.1;
-        resistance = 1;
+        elasticity = 0.7;
+        resistance = 1/distance(orig.xy,pos.xy);//0.1;
         //divide by 10 so it doesn't follow too closely, this has a huge affect
-        attraction = (1-resistance)/10;
+        attraction = (1-resistance)/100;
     }else{
         //find the vector that goes from position to screen.xy
         targetV = screen.xy - pos.xy;
@@ -47,6 +47,7 @@ void main(void){
     // Calculate what´s going to be the next position without updating it,
     // to see if it collide with the borders of the FBO texture.
     vec2 nextPos = pos.xy;
+    //this is what is done in the posUpdate.frag
     nextPos += (vel.xy * resistance) * timestep;
         
     // If it´s going to collide, change the velocity course.

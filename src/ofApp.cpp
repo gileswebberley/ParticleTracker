@@ -49,7 +49,7 @@ void ofApp::setup(){
     // Seting the textures where the information ( position and velocity ) will be
     textureRes = (int)sqrt((float)numParticles);
     numParticles = textureRes * textureRes;
-    reference.load(referenceFile);
+    if(!reference.load(referenceFile))cout<<"REFERENCE IMAGE FAILED TO LOAD\n";
     reference.resize(textureRes,textureRes);
 
     //arrays of floats as pixels with position and elasticity information
@@ -68,7 +68,7 @@ void ofApp::setup(){
         }
     }
     // Load this information in to the FBO's texture
-    posPingPong.allocate(textureRes, textureRes, GL_RGB32F);
+    posPingPong.allocate(textureRes, textureRes, GL_RGB32F, GL_NEAREST);
     posPingPong.src->getTexture().loadData(pos.data(), textureRes, textureRes, GL_RGB);
     posPingPong.dst->getTexture().loadData(pos.data(), textureRes, textureRes, GL_RGB);
     //and save into the original positions texture
@@ -109,7 +109,9 @@ void ofApp::setup(){
             mesh.addTexCoord({x, y});
             //this colour is passed through to the shader pipeline, appears as gl_color I think
             //mesh.addColor(ofFloatColor((((x+128)%255)/255.0),ofRandom(0.1,0.8),((y+128)%255)/255.0));
-            mesh.addColor(ofFloatColor(reference.getColor(x,y)));
+            ofColor tc =reference.getColor(x,y);
+            //cout<<"colour: "<<reference.getColor(x,y)<<"\n";
+            mesh.addColor(ofFloatColor(tc.r/255.0,tc.g/255.0,tc.b/255.0));
         }
     }
 
@@ -133,6 +135,8 @@ void ofApp::update(){
         cntr = 0;
         track0 = (track_largest)? tracker->getLargestPoint() : tracker->getClosestPoint(track0);
     }
+    //for testing without any tracking occuring
+    //track0 = ofPoint(0,0);
     //if(track0.x <= 0) cout<<"track0.x is 0\n";//track0.x = mouseX;//2;
     //if(track0.y <= 0) cout<<"track0.y is 0\n";//track0.y = mouseY;//2;
 

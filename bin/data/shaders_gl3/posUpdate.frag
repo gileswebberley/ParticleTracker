@@ -15,7 +15,7 @@ void main(void){
     vec3 pos = texture( prevPosData, vTexCoord).xyz;
     vec3 vel = texture( velData, vTexCoord).xyz;
     
-    // Update the position.
+    // Update the position. vel.z is the resistance
     pos.xy += (vel.xy * vel.z) * timestep;
     
     // And finally store it on the position FBO.
