@@ -13,7 +13,7 @@ void ofApp::setup(){
     ofHideCursor();
     ofSetVerticalSync(true);
     ofSetBackgroundAuto(false);
-    ofSetFrameRate(60);
+    //ofSetFrameRate(60);
     // add in the particle system and split it out later to make it more
     //controllable/reusable-------------------------------------------------------
     //time at startup
@@ -49,6 +49,7 @@ void ofApp::setup(){
     // Seting the textures where the information ( position and velocity ) will be
     textureRes = (int)sqrt((float)numParticles);
     numParticles = textureRes * textureRes;
+
     if(!reference.load(referenceFile))cout<<"REFERENCE IMAGE FAILED TO LOAD\n";
     reference.resize(textureRes,textureRes);
 
@@ -72,6 +73,7 @@ void ofApp::setup(){
     posPingPong.src->getTexture().loadData(pos.data(), textureRes, textureRes, GL_RGB);
     posPingPong.dst->getTexture().loadData(pos.data(), textureRes, textureRes, GL_RGB);
     //and save into the original positions texture
+    //original_pos.allocate(textureRes, textureRes,GL_RGB32F);
     original_pos.loadData(pos.data(),textureRes,textureRes,GL_RGB);
 
 
@@ -137,8 +139,6 @@ void ofApp::update(){
     }
     //for testing without any tracking occuring
     //track0 = ofPoint(0,0);
-    //if(track0.x <= 0) cout<<"track0.x is 0\n";//track0.x = mouseX;//2;
-    //if(track0.y <= 0) cout<<"track0.y is 0\n";//track0.y = mouseY;//2;
 
     //add in the particle system stuff--------------------------------------------
     //start 'recording' the velocity destination buffer

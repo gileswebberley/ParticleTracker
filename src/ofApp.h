@@ -76,13 +76,13 @@ private:
     ofImage sparkImg;
     string imageFile{"droplet2.png"};
     float   timeStep,time0;
-    ofColor bgColour{255};
+    ofColor bgColour{12,63,90};
     //width and height of the window set in setup
     int     width, height;
     //width and height of the particle image
     int     imgWidth, imgHeight;
     //total number of particles in the system
-    int     numParticles{10000};
+    int     numParticles{15000};
     //the bigger the particle the slower it runs
     float   particleSize{5.0f};
     //initial x/y position max
@@ -90,7 +90,7 @@ private:
     //elasticity max and min
     float elasMin{0.1},elasMax{0.3};
     //maximum velocity and then min and max resistance
-    float velScale{0.00002},resistMin{0.3},resistMax{0.99};
+    float velScale{0.2},resistMin{0.3},resistMax{0.99};
 
     int     textureRes;
 

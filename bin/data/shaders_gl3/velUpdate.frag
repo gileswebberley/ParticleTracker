@@ -22,21 +22,21 @@ void main(void){
     float attraction;
 
     if(screen.x <= 0 && screen.y <= 0){
-        //find the vector that goes from position to screen.xy
+        //find the vector that goes from position to orig.xy
         targetV = orig.xy - pos.xy;
         //make it a unit vector by dividing by it's magnitude |v|
         targetV /= distance(orig.xy,pos.xy);
-        elasticity = 0.7;
-        resistance = 1/distance(orig.xy,pos.xy);//0.1;
+        elasticity = pos.z;//0.7;
+        resistance = vel.z*distance(orig.xy,pos.xy);//0.1;
         //divide by 10 so it doesn't follow too closely, this has a huge affect
-        attraction = (1-resistance)/100;
+        attraction = (1-resistance)/1000;
     }else{
         //find the vector that goes from position to screen.xy
         targetV = screen.xy - pos.xy;
         //make it a unit vector by dividing by it's magnitude |v|
         targetV /= distance(screen.xy,pos.xy);
         elasticity = pos.z;
-        resistance = vel.z;
+        resistance = vel.z;//*abs(distance(screen.xy,pos.xy));
         //divide by 10 so it doesn't follow too closely, this has a huge affect
         attraction = (1-resistance)/10;
     }
@@ -50,18 +50,8 @@ void main(void){
     //this is what is done in the posUpdate.frag
     nextPos += (vel.xy * resistance) * timestep;
         
-    // If it´s going to collide, change the velocity course.
-//    if ( nextPos.x < attraction)
-//        vel.x = elasticity * abs(vel.x);
-        
-//    if ( nextPos.x > 1-attraction)
-//        vel.x = -elasticity * abs(vel.x);
-        
-//    if (nextPos.y < attraction)
-//        vel.y = elasticity * abs(vel.y);
-    
-//    if ( nextPos.y > 1-attraction)
-//        vel.y = -elasticity * abs(vel.y);
+    // If it´s going to collide with the screen edges, change the velocity course.
+
     if ( nextPos.x < 0)
         vel.x = elasticity * abs(vel.x);
 
