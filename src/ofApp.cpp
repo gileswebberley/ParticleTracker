@@ -12,7 +12,7 @@ void ofApp::setup(){
     //tracker = new expressionsTrack("haarcascade_upperbody.xml");
     ofHideCursor();
     ofSetVerticalSync(true);
-    ofSetBackgroundAuto(false);
+    ofSetBackgroundAuto(true);
     //ofSetFrameRate(60);
     // add in the particle system and split it out later to make it more
     //controllable/reusable-------------------------------------------------------
@@ -99,7 +99,7 @@ void ofApp::setup(){
     // Allocate the final
     renderFBO.allocate(width, height, GL_RGB32F);
     renderFBO.begin();
-    ofClear(0, 0, 0, 255);
+    ofClear(0, 0, 0);
     renderFBO.end();
 
     //Add all of the points to the ofVboMesh object that reflect
@@ -110,10 +110,9 @@ void ofApp::setup(){
             mesh.addVertex({x,y,0});
             mesh.addTexCoord({x, y});
             //this colour is passed through to the shader pipeline, appears as gl_color I think
-            //mesh.addColor(ofFloatColor((((x+128)%255)/255.0),ofRandom(0.1,0.8),((y+128)%255)/255.0));
             ofColor tc =reference.getColor(x,y);
             //cout<<"colour: "<<reference.getColor(x,y)<<"\n";
-            mesh.addColor(ofFloatColor(tc.r/255.0,tc.g/255.0,tc.b/255.0));
+            mesh.addColor(ofFloatColor(tc.r/255.0,tc.g/255.0,tc.b/255.0,0.1));
         }
     }
 
@@ -127,6 +126,7 @@ void ofApp::update(){
     //they must be in the scope of the update() method
     //and initialised inline (ie not in the header file unless const)
     static int cntr{0};
+    //static int fade{0};
     static ofPoint track0{0.0f,0.0f};
     if(cntr < track_delay_time){
         draw_delay = true;
@@ -136,6 +136,7 @@ void ofApp::update(){
         draw_delay = false;
         cntr = 0;
         track0 = (track_largest)? tracker->getLargestPoint() : tracker->getClosestPoint(track0);
+
     }
     //for testing without any tracking occuring
     //track0 = ofPoint(0,0);
@@ -201,18 +202,15 @@ void ofApp::update(){
     posPingPong.swap();
 
 
-    // Rendering
-    //
-    // 1.   Sending this vertex to the Vertex Shader.
-    //      Each one it's draw exactly on the position that match where it's stored on both vel and pos textures
-    //      So on the Vertex Shader (that's first in the pipeline) can search for it information and move it
-    //      to it right position.
-    // 2.   Once it's in the right place the Geometry Shader make 6 more vertex in order to make a billboard
-    // 3.   that then on the Fragment Shader is going to be filled with the pixels of sparkImg texture
-    //
+    // Rendering--------------------------------------------
+
     renderFBO.begin();
-    //this is where the background colour is set
-    ofClear(bgColour);
+    //cover the screen with a filled rectangle to produce trails via the alpha channel of bgColour variable
+    ofFill();
+    ofSetColor(bgColour);
+    ofDrawRectangle(0,0,width,height);
+
+    //then update the rendering shader
     updateRender.begin();
     updateRender.setUniformTexture("posTex", posPingPong.src->getTexture(), 0);
     updateRender.setUniformTexture("sparkTex", sparkImg.getTexture() , 1);
@@ -224,8 +222,7 @@ void ofApp::update(){
 
     ofPushStyle();
     ofEnableBlendMode( OF_BLENDMODE_ALPHA );
-    //ofSetColor(255);
-    //draw the mesh through the rendering shaders
+    //now draw the mesh through the rendering shaders
     mesh.drawFaces();
 
     ofDisableBlendMode();
@@ -238,9 +235,6 @@ void ofApp::update(){
 
 //--------------------------------------------------------------
 void ofApp::draw(){
-//    ofSetColor(255);
-//    /*if(!draw_delay)*/tracker->drawFindings();
-    ofBackground(28);
     //now draw the rendered particle system
     renderFBO.draw(0,0);
     //tracker->drawInput();//for framing
