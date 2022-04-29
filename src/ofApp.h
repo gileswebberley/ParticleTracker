@@ -59,7 +59,8 @@ private:
     expressionsTrack* tracker;
     //int grabW{640}, grabH{480};
     bool draw_delay{true}, track_largest{true};//track_closest is default when this is false
-    int track_delay_time{2},fade_delay{25};
+    int track_delay_time{2};
+    const float fade_bg_amount{25};
     int difference_threshold{128};
 
     //add in the particle system...
@@ -76,7 +77,7 @@ private:
     ofImage sparkImg;
     string imageFile{"droplet2.png"};
     float   timeStep,time0;
-    ofColor bgColour{70,63,90,15};
+    ofColor bgColour{70,63,90,fade_bg_amount};
     //width and height of the window set in setup
     int     width, height;
     //width and height of the particle image
@@ -88,9 +89,9 @@ private:
     //initial x/y position max
     //float pos0{0.5};
     //elasticity max and min
-    float elasMin{0.2},elasMax{0.7};
-    //maximum velocity and then min and max resistance
-    float velScale{0.2},resistMin{0.3},resistMax{0.7};
+    float elasMin{0.2},elasMax{0.8};
+    //maximum start velocity and then min and max resistance
+    float velScale{0.5},resistMin{0.05},resistMax{0.95};
 
     int     textureRes;
 

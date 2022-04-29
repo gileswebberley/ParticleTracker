@@ -112,7 +112,7 @@ void ofApp::setup(){
             //this colour is passed through to the shader pipeline, appears as gl_color I think
             ofColor tc =reference.getColor(x,y);
             //cout<<"colour: "<<reference.getColor(x,y)<<"\n";
-            mesh.addColor(ofFloatColor(tc.r/255.0,tc.g/255.0,tc.b/255.0,0.1));
+            mesh.addColor(ofFloatColor(tc.r/255.0,tc.g/255.0,tc.b/255.0,1.0));
         }
     }
 
@@ -210,6 +210,12 @@ void ofApp::update(){
     ofSetColor(bgColour);
     ofDrawRectangle(0,0,width,height);
 
+    //try to get the colours shifting
+    static ofVec3f colour_shift{0,0,0};//xyz = rgb
+    colour_shift.x = fmod(colour_shift.x+=ofRandomuf()*(track0.x/width),255);
+    colour_shift.y = fmod(colour_shift.y+=ofRandomuf()*(track0.y/height),255);
+    colour_shift.z = fmod(colour_shift.z+=ofRandomuf()*(track0.x/width+track0.y/height)/2,255);
+
     //then update the rendering shader
     updateRender.begin();
     updateRender.setUniformTexture("posTex", posPingPong.src->getTexture(), 0);
@@ -219,6 +225,7 @@ void ofApp::update(){
     updateRender.setUniform1f("size", (float)particleSize);
     updateRender.setUniform1f("imgWidth", imgWidth);
     updateRender.setUniform1f("imgHeight", imgHeight);
+    updateRender.setUniform3f("colourShift",colour_shift);
 
     ofPushStyle();
     ofEnableBlendMode( OF_BLENDMODE_ALPHA );

@@ -8,6 +8,7 @@ uniform mat4 modelViewProjectionMatrix;
 
 uniform float size;
 uniform float imgWidth, imgHeight;
+uniform vec3 colourShift;
 
 in vec4 vPosition[];
 in vec4 vColor[];
@@ -24,7 +25,9 @@ void main(void){
 
     for(int i = 0; i < gl_in.length(); i++){
         //for each vertex pass on the colour to frag shader set via mesh.addColor()
-        gColor = vColor[i];
+        gColor.r = mod(vColor[i].r+(colourShift.r/255.0),0.9)+0.1;
+        gColor.g = mod(vColor[i].g+(colourShift.g/255.0),0.9)+0.1;
+        gColor.b = mod(vColor[i].b+(colourShift.b/255.0),0.9)+0.1;
         //now layout the first of two triangles that make up the rectangle to render the image within
 gl_Position = modelViewProjectionMatrix * ( vPosition[i] + vec4(-size,-size,0.0,0.0));
         vTexCoord.x = 0.0;
