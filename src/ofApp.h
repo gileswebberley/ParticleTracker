@@ -3,7 +3,7 @@
 #include "ofMain.h"
 #include "expressionstrack.h"
 
-//add in the particle system...
+//add in the particle system...thanks as always to the openframeworks community for providing this template
 struct pingPongBuffer {
 public:
     void allocate( int _width, int _height, int _internalformat = GL_RGBA, int mag_filter = GL_NEAREST){
@@ -43,6 +43,11 @@ private:
     ofFbo   FBOs[2];    // Real addresses of ping/pong FBO«s
 };
 
+//because I want to add in a third type of tracking I think I need to make an enum class like I made for the InputSelector, then call the appropriate method
+enum class TRACK_TYPE{
+    CLOSEST, FURTHEST, LARGEST
+};
+
 
 class ofApp : public ofBaseApp{
 
@@ -58,16 +63,19 @@ private:
     //the target tracker, create new in setup()
     expressionsTrack* tracker;
     //int grabW{640}, grabH{480};
-    bool draw_delay{true}, track_largest{true};//track_closest is default when this is false
-    int track_delay_time{2};
-    const float fade_bg_amount{25};
-    int difference_threshold{128};
+    bool draw_delay{true};
+    //replaced by TRACK_TYPE, track_largest{false};
+    //track_closest is default when this is false
+    TRACK_TYPE track_flag{TRACK_TYPE::FURTHEST};
+    int track_delay_time{3};
+    const float fade_bg_amount{125};
+    int difference_threshold{130};
 
     //add in the particle system...
     //original positions
     ofTexture original_pos;
     ofImage reference;
-    string referenceFile{"reference_face.jpg"};
+    string referenceFile{"yellow-bird.jpg"};
     ofShader    updatePos;
     ofShader    updateVel;
     ofShader    updateRender;
@@ -77,21 +85,21 @@ private:
     ofImage sparkImg;
     string imageFile{"droplet2.png"};
     float   timeStep,time0;
-    ofColor bgColour{70,63,90,fade_bg_amount};
+    ofColor bgColour{40,40,40,fade_bg_amount};
     //width and height of the window set in setup
     int     width, height;
     //width and height of the particle image
     int     imgWidth, imgHeight;
     //total number of particles in the system
-    int     numParticles{20000};
+    int     numParticles{50000};
     //the bigger the particle the slower it runs
-    float   particleSize{3.0f};
+    float   particleSize{2.0f};
     //initial x/y position max
     //float pos0{0.5};
     //elasticity max and min
-    float elasMin{0.2},elasMax{0.8};
+    float elasMin{0.02},elasMax{0.6};
     //maximum start velocity and then min and max resistance
-    float velScale{0.5},resistMin{0.05},resistMax{0.95};
+    float velScale{0.10},resistMin{0.005},resistMax{0.99};
 
     int     textureRes;
 

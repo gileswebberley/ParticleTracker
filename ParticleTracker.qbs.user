@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE QtCreatorProject>
-<!-- Written by QtCreator 4.12.3, 2022-04-13T16:36:57. -->
+<!-- Written by QtCreator 4.12.3, 2022-07-26T18:36:55. -->
 <qtcreator>
  <data>
   <variable>EnvironmentId</variable>
@@ -144,6 +144,7 @@
       <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">Qbs.BuildStep</value>
       <value type="bool" key="Qbs.CleanInstallRoot">false</value>
       <valuemap type="QVariantMap" key="Qbs.Configuration">
+       <value type="bool" key="modules.cpp.separateDebugInformation">false</value>
        <value type="QString" key="qbs.defaultBuildVariant">release</value>
        <value type="QString" key="qbs.profile">qtc_Desktop_8a7b2d10</value>
        <value type="bool" key="qbspm.forceProbes">false</value>
@@ -179,7 +180,7 @@
     <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">Qbs.QbsBuildConfiguration</value>
     <value type="QString" key="Qbs.configName">Release_Desktop_9467cca98300890e</value>
     <value type="int" key="QtQuickCompiler">2</value>
-    <value type="int" key="SeparateDebugInfo">2</value>
+    <value type="int" key="SeparateDebugInfo">1</value>
    </valuemap>
    <value type="int" key="ProjectExplorer.Target.BuildConfigurationCount">2</value>
    <valuemap type="QVariantMap" key="ProjectExplorer.Target.DeployConfiguration.0">

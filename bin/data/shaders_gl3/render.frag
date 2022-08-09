@@ -12,6 +12,6 @@ out vec4 vFragColor;
 void main() {
 //    vec3 myColor = texture(vColor, vTexCoord).rgb;
     vec4 myTex = texture(sparkTex, vTexCoord).rgba;
-    myTex.rgba = gColor.rgba;
+    myTex.rgb = gColor.rgb;
     vFragColor = myTex;
 }

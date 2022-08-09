@@ -9,11 +9,11 @@ void ofApp::setup(){
     //to use difference mode then set the threshold
     tracker = new expressionsTrack(difference_threshold);
     //to use haar cascades...
-    //tracker = new expressionsTrack("haarcascade_upperbody.xml");
+    //**not functioning!! tracker = new expressionsTrack("haarcascade_upperbody.xml");
     ofHideCursor();
     ofSetVerticalSync(true);
     ofSetBackgroundAuto(true);
-    //ofSetFrameRate(60);
+    ofSetFrameRate(60);
     // add in the particle system and split it out later to make it more
     //controllable/reusable-------------------------------------------------------
     //time at startup
@@ -135,7 +135,21 @@ void ofApp::update(){
         tracker->doFinding();
         draw_delay = false;
         cntr = 0;
-        track0 = (track_largest)? tracker->getLargestPoint() : tracker->getClosestPoint(track0);
+        //using the enum type TRACK_TYPE, I'm pretty sure that a switch can be used for an enum but nervous tbh
+        switch(track_flag){
+        case TRACK_TYPE::CLOSEST:
+            track0 = tracker->getClosestPoint(track0);
+            break;
+        case TRACK_TYPE::FURTHEST:
+            track0 = tracker->getFurthestPoint(track0);
+            break;
+        case TRACK_TYPE::LARGEST:
+            track0 = tracker->getLargestPoint();
+            break;
+        default:
+            track0 = tracker->getClosestPoint(track0);
+        }
+        //track0 = (track_largest)? tracker->getLargestPoint() : tracker->getClosestPoint(track0);
 
     }
     //for testing without any tracking occuring

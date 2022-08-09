@@ -74,23 +74,32 @@ bool expressionsTrack::doFinding()
     if(vidIn.updateInput()){
         //set using a reference to the pixel data of the video
         rgbimg.setFromPixels(vidIn.getPixelRead());
-        rgbimg.dilate();
+        //rgbimg.dilate(); 01-07-22
         grayimg.setFromColorImage(rgbimg);
+        grayimg.dilate();//01-07-22 trying to get rid of noise
         grayimg.contrastStretch();
         if(diff_mode){
             if(!diffbgset){
+                static int wait_for_camera = 1;
                 graybg = grayimg;
-                diffbgset = true;
+                //this has been added to let the feed from the camera settle as I have made it lock in the background and so track anything that's different from that rather than what's changed between frames
+                if(wait_for_camera>10){
+                    graybg.contrastStretch();
+                    diffbgset = true;
                 cout<<"difference background image has been set....\n";
+                }else{
+                    wait_for_camera++;
+                }
                 //there'll be no diff as it's just been set so...
                 return false;
             }
             grayabs.absDiff(graybg,grayimg);//the difference between the last fram and this one
-            graybg = grayimg;//set last one as this one for the next loop
-            grayabs.contrastStretch();//adds exposure noise so get rid of?
+            //01-07-22 removing to make tracking better
+            //graybg = grayimg;//set last one as this one for the next loop
+            //grayabs.contrastStretch();//adds exposure noise so get rid of?
             grayabs.threshold(diff_threshold);//create a binary(blk or wht) image
             grayabs.blur(5);//blur to get rid of some noise
-            contours.findContours(grayabs,minBlobArea,maxBlobArea,maxBlobs,false);//then find the white areas in the difference image
+            contours.findContours(grayabs,minBlobArea,maxBlobArea,maxBlobs,true);//then find the white areas in the difference image
             blobCnt = contours.blobs.size();
         }else{
             //all the hard work done for us...
@@ -135,7 +144,8 @@ bool expressionsTrack::doFinding()
 ofPoint expressionsTrack::getClosestPoint(ofPoint point)
 {
     vector<ofPoint> vp = getCentrePoints();
-    ofPoint retPt = point;
+    //to make sure it clears when there are no trackblobs
+    ofPoint retPt{0,0};
     if(!vp.empty()){
         float dist = point.distance(vp[0]);
         retPt = vp[0];
@@ -149,6 +159,29 @@ ofPoint expressionsTrack::getClosestPoint(ofPoint point)
         }
     }
     //cout<<"CLOSEST POINT TO :"<<point.x<<"/"<<point.y<<" is "<<retPt.x<<"/"<<retPt.y<<"\n";
+    return retPt;
+}
+
+//adapt getClosestPoint to track furthest
+ofPoint expressionsTrack::getFurthestPoint(ofPoint point)
+{
+    vector<ofPoint> vp = getCentrePoints();
+    //to make sure it clears when there are no trackblobs
+    ofPoint retPt{0,0};
+    if(!vp.empty()){
+        float dist = point.distance(vp[0]);
+        retPt = vp[0];
+        for(int i=1; i<maxBlobs; i++){
+            if(trackBlobs.at(i).getInit()){
+                //simply test for greater distance rather than less
+                if(point.distance(vp[i])>dist){
+                    dist = point.distance(vp[i]);
+                    retPt = vp[i];
+                }
+            }
+        }
+    }
+    //cout<<"FURTHEST POINT TO :"<<point.x<<"/"<<point.y<<" is "<<retPt.x<<"/"<<retPt.y<<"\n";
     return retPt;
 }
 

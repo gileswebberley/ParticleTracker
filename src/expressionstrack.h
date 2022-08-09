@@ -21,15 +21,15 @@ class expressionsTrack
     //seperated out the blob behaviour
     vector<TrackBlob> trackBlobs;
     //given it a limit as I was struggling to think of a way to keep track tbh
-    int maxBlobs{10}, blobCnt{0}, killWait{5};
+    int maxBlobs{10}, blobCnt{0}, killWait{2};
     //size for the grabber etc
     int grabW{352}, grabH{288};
     //the minimum blob area to be registered in findContours()
     float minBlobArea = (grabW*grabH)*0.003;
     //the maximum blob area to be registered in findContours()
-    float maxBlobArea = (grabW*grabH)*0.05;
+    float maxBlobArea = (grabW*grabH)*0.2;
     //difference threshold for tracking default, set with setUpTrack(int)
-    int diff_threshold{100};
+    int diff_threshold{128};
     //if using diff method is the background image set
     bool diffbgset{false},diff_mode{false};
 
@@ -57,6 +57,8 @@ public:
     ofPoint getClosestPoint(ofPoint point);
     //to get the trackblob with the largest area
     ofPoint getLargestPoint();
+    //added in at the last minute to try to make the tracking more dynamic, I'm hoping that it will mean that if the viewer pushes away with their arms it will feel like they're pushing the particle cloud itself
+    ofPoint getFurthestPoint(ofPoint point);
     //so I can test and tweak see what the camera is seeing
     void drawInput();
     //I failed in making this work as I hoped :(
