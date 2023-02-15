@@ -149,7 +149,7 @@ ofPoint expressionsTrack::getClosestPoint(ofPoint point)
     if(!vp.empty()){
         float dist = point.distance(vp[0]);
         retPt = vp[0];
-        for(int i=1; i<maxBlobs; i++){
+        for(int i=1; i < vp.size(); i++){
             if(trackBlobs.at(i).getInit()){
                 if(point.distance(vp[i])<dist){
                     dist = point.distance(vp[i]);
@@ -171,10 +171,10 @@ ofPoint expressionsTrack::getFurthestPoint(ofPoint point)
     if(!vp.empty()){
         float dist = point.distance(vp[0]);
         retPt = vp[0];
-        for(int i=1; i<maxBlobs; i++){
+        for(int i=1; i < vp.size(); i++){
             if(trackBlobs.at(i).getInit()){
                 //simply test for greater distance rather than less
-                if(point.distance(vp[i])>dist){
+                if(point.distance(vp.at(i)) > dist){
                     dist = point.distance(vp[i]);
                     retPt = vp[i];
                 }
@@ -188,7 +188,7 @@ ofPoint expressionsTrack::getFurthestPoint(ofPoint point)
 ofPoint expressionsTrack::getLargestPoint(){
     float largest{0};
     int index{0};
-    for(int i=0; i<maxBlobs; i++){
+    for(int i=0; i<maxBlobs-1; i++){
         if(trackBlobs.at(i).getInit()){
             float this_area = trackBlobs.at(i).getArea();
             if(this_area>largest){

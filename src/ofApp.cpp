@@ -149,7 +149,6 @@ void ofApp::update(){
         default:
             track0 = tracker->getClosestPoint(track0);
         }
-        //track0 = (track_largest)? tracker->getLargestPoint() : tracker->getClosestPoint(track0);
 
     }
     //for testing without any tracking occuring
@@ -258,7 +257,7 @@ void ofApp::update(){
 void ofApp::draw(){
     //now draw the rendered particle system
     renderFBO.draw(0,0);
-    //tracker->drawInput();//for framing
+    tracker->drawInput();//for framing
     //tracker->drawFindings();//to see tracking boxes
 }
 
