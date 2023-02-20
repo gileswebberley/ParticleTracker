@@ -96,7 +96,7 @@ void ofApp::setup(){
     imgWidth = sparkImg.getWidth();
     imgHeight = sparkImg.getHeight();
 
-    // Allocate the final
+    // Allocate the final renderer
     renderFBO.allocate(width, height, GL_RGB32F);
     renderFBO.begin();
     ofClear(0, 0, 0);

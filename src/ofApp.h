@@ -67,42 +67,50 @@ private:
     //replaced by TRACK_TYPE, track_largest{false};
     //track_closest is default when this is false
     TRACK_TYPE track_flag{TRACK_TYPE::FURTHEST};
+    //don't need to track every frame to be responsive
     int track_delay_time{3};
+    //alpha channel for controlling the fade
     const float fade_bg_amount{125};
+    //set higher for low contrast images [0..255]
     int difference_threshold{130};
 
     //add in the particle system...
     //original positions
     ofTexture original_pos;
+    //the starting image
     ofImage reference;
     string referenceFile{"yellow-bird.jpg"};
+    //the connections to the gpu
     ofShader    updatePos;
     ofShader    updateVel;
-    ofShader    updateRender;
+    ofShader    updateRender;    
+    //our two ping pong FBOs
     pingPongBuffer posPingPong;
     pingPongBuffer velPingPong;
+    //the FBO we draw in to
     ofFbo   renderFBO;
+    //the image that each particle has
     ofImage sparkImg;
     string imageFile{"droplet2.png"};
     float   timeStep,time0;
+ 
     ofColor bgColour{40,40,40,fade_bg_amount};
     //width and height of the window set in setup
     int     width, height;
     //width and height of the particle image
     int     imgWidth, imgHeight;
     //total number of particles in the system
-    int     numParticles{50000};
+    int     numParticles{200000};
     //the bigger the particle the slower it runs
     float   particleSize{2.0f};
-    //initial x/y position max
-    //float pos0{0.5};
-    //elasticity max and min
+    //elasticity of each particles behaviour (max and min)
     float elasMin{0.02},elasMax{0.6};
     //maximum start velocity and then min and max resistance
     float velScale{0.10},resistMin{0.005},resistMax{0.99};
 
     int     textureRes;
 
+    //finally the mesh that the shaders control (so, all of the points, or particles)
     ofVboMesh mesh;
 
 };
