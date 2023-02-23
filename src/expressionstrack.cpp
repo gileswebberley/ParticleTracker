@@ -171,6 +171,7 @@ ofPoint expressionsTrack::getFurthestPoint(ofPoint point)
     if(!vp.empty()){
         float dist = point.distance(vp[0]);
         retPt = vp[0];
+        //it seems that maxBlobs is not the same size as vp[] so use the size() method
         for(int i=1; i < vp.size(); i++){
             if(trackBlobs.at(i).getInit()){
                 //simply test for greater distance rather than less
@@ -188,9 +189,11 @@ ofPoint expressionsTrack::getFurthestPoint(ofPoint point)
 ofPoint expressionsTrack::getLargestPoint(){
     float largest{0};
     int index{0};
-    for(int i=0; i<maxBlobs-1; i++){
+    for(int i=0; i<trackBlobs.size(); i++){
+        //firstly check that the track blob is initialised
         if(trackBlobs.at(i).getInit()){
             float this_area = trackBlobs.at(i).getArea();
+            //then compare by area (size)
             if(this_area>largest){
                 index = i;
                 largest = this_area;
@@ -200,10 +203,11 @@ ofPoint expressionsTrack::getLargestPoint(){
     return trackBlobs.at(index).getCentrePoint();
 }
 
+//simply returns a vector of all of the trackBlobs centre points
 vector<ofPoint> expressionsTrack::getCentrePoints()
 {
     vector<ofPoint> points;
-    for(int i=0; i<maxBlobs; i++){
+    for(int i=0; i< trackBlobs.size(); i++){
         if(trackBlobs.at(i).getInit()){
             points.push_back(trackBlobs.at(i).getCentrePoint());
         }
