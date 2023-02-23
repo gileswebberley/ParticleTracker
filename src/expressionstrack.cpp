@@ -36,11 +36,17 @@ expressionsTrack::~expressionsTrack()
 //setup function for difference tracking method
 bool expressionsTrack::setupTrack(int diffThreshold)
 {
+    //a little check that the value is valid
     diff_threshold = (abs(diffThreshold)>254)?254:abs(diffThreshold);
+    //allocate and set up use of ofTexture for a bit of optimisation
     grayimg.allocate(grabW,grabH);
+    grayimg.setUseTexture(true);
     graybg.allocate(grabW,grabH);
+    graybg.setUseTexture(true);
     grayabs.allocate(grabW,grabH);
+    grayabs.setUseTexture(true);
     rgbimg.allocate(grabW,grabH);
+    rgbimg.setUseTexture(true);
     diff_mode = true;
     trackBlobs.assign(maxBlobs,TrackBlob(grabW,grabH));
     return diff_mode;
@@ -48,6 +54,7 @@ bool expressionsTrack::setupTrack(int diffThreshold)
 
 bool expressionsTrack::setupTrack(string haarpath)
 {
+    diff_mode = false;
     cout<<"TRACKER SETUP\n";
     finder.setup(haarpath);
     //other variables that you can tweek to make finding better
@@ -65,48 +72,70 @@ bool expressionsTrack::setupTrack(string haarpath)
     trackBlobs.assign(maxBlobs,TrackBlob(grabW,grabH));
     return true;
 }
+void expressionsTrack::videoToGrayImage()
+{
+    //set using a reference to the pixel data of the video returned from input-selector
+    rgbimg.setFromPixels(vidIn.getPixelRead());
+    //set up the grayscale image which is compared to graybg
+    grayimg.setFromColorImage(rgbimg);
+    grayimg.dilate();//01-07-22 trying to get rid of noise
+    grayimg.contrastStretch();//trying to make the histogram the same, remove little AE shifts
+}
 
+bool expressionsTrack::waitForCameraStart(int wait)
+{
+    //to give the camera time to go through it's auto-exposure routine
+    static int wait_for_camera = 1;
+    //this has been added to let the feed from the camera settle as I have made it lock in the background and so track anything that's different from that rather than what's changed between frames
+    if (wait_for_camera > wait) {
+        videoToGrayImage();
+        //set up the background as this first frame after waiting
+        graybg = grayimg;
+        //graybg.contrastStretch();
+        //diffbgset = true;
+        cout << "difference background image has been set....\n";
+        return true;
+    }
+    else {
+        wait_for_camera++;
+        return false;
+    }
+}
+//returns true when there are findings ready to be accessed, if false then it's doing some kind of setup or has failed in some way
 bool expressionsTrack::doFinding()
 {
+    //static counters to keep track of what findings we have at any moment
     //it's 1 so we don't end up trying to access trackBlobs[-1]
     static int maxBlobCnt = 1;
     static int killCnt = 0;
+    //check whether input-selector video has a new frame
     if(vidIn.updateInput()){
-        //set using a reference to the pixel data of the video
-        rgbimg.setFromPixels(vidIn.getPixelRead());
-        //rgbimg.dilate(); 01-07-22
-        grayimg.setFromColorImage(rgbimg);
-        grayimg.dilate();//01-07-22 trying to get rid of noise
-        grayimg.contrastStretch();
+        //are we using contour finder?
         if(diff_mode){
+            //check if bg image has been set
             if(!diffbgset){
-                static int wait_for_camera = 1;
-                graybg = grayimg;
-                //this has been added to let the feed from the camera settle as I have made it lock in the background and so track anything that's different from that rather than what's changed between frames
-                if(wait_for_camera>10){
-                    graybg.contrastStretch();
-                    diffbgset = true;
-                cout<<"difference background image has been set....\n";
-                }else{
-                    wait_for_camera++;
-                }
+                diffbgset = waitForCameraStart(10);
                 //there'll be no diff as it's just been set so...
                 return false;
             }
+            videoToGrayImage();
             grayabs.absDiff(graybg,grayimg);//the difference between the last fram and this one
-            //01-07-22 removing to make tracking better
-            //graybg = grayimg;//set last one as this one for the next loop
+            //01-07-22 removing to make tracking better for exhibition space
+            graybg = grayimg;//set last one as this one for the next loop
             //grayabs.contrastStretch();//adds exposure noise so get rid of?
             grayabs.threshold(diff_threshold);//create a binary(blk or wht) image
             grayabs.blur(5);//blur to get rid of some noise
-            contours.findContours(grayabs,minBlobArea,maxBlobArea,maxBlobs,true);//then find the white areas in the difference image
-            blobCnt = contours.blobs.size();
-        }else{
-            //all the hard work done for us...
-            finder.findHaarObjects(grayimg);
-            blobCnt = finder.blobs.size();
+            contours.findContours(grayabs,minBlobArea,maxBlobArea,maxBlobs,true);//use the openCV contour finder
+            blobCnt = contours.blobs.size();//then find the white areas in the difference image
         }
-        //if we haven't found anything then give up this time
+        //if not we must be using Haar finder
+        else{
+            //all the hard work done for us...
+            cerr << "Expressions tracker Haar mode is under development\n";
+            //finder.findHaarObjects(grayimg);
+            //blobCnt = finder.blobs.size();
+        }
+        //if we haven't found anything kill off the old track blobs
         if(blobCnt < maxBlobCnt){
             //wait for a bit so it's not twitchy
             killCnt++;
@@ -116,9 +145,8 @@ bool expressionsTrack::doFinding()
                 killCnt = 0;
                 maxBlobCnt -= 1;//this has fixed some blobs not dying
             }
-            //return false;
         }else{
-            //still finding the same amount of blobs...
+            //still finding the same amount of blobs or more
             maxBlobCnt = blobCnt;
             killCnt = 0;
         }
@@ -126,13 +154,14 @@ bool expressionsTrack::doFinding()
         if(blobCnt > maxBlobs) blobCnt = maxBlobs;
         //cout<<"Tracker has found "<<blobCnt<<" blobs\n";
         for(int i=0; i < blobCnt; i++){
-            //cout<<"blob #"<<i<<"\n";
-            ofRectangle bb = (diff_mode)? contours.blobs[i].boundingRect:finder.blobs[i].boundingRect;
+            //find the bounding boxes, centre points, and area to pass on to our track blobs
+            ofRectangle bb = (diff_mode)? contours.blobs[i].boundingRect : finder.blobs[i].boundingRect;
             ofPoint cp = (diff_mode)? contours.blobs[i].centroid : finder.blobs[i].centroid;
-            float ar =(diff_mode)?contours.blobs[i].area : finder.blobs[i].area;
-            //it seems to remain in order so each tracker should be the same object
+
+            //it seems to remain in order so each tracker should be the same object - bit of an assumption!?
             trackBlobs.at(i).updateTrackBlob(cp, bb.width, bb.height);
             //added functionality for tracking the largest blob
+            float ar = (diff_mode) ? contours.blobs[i].area : finder.blobs[i].area;
             trackBlobs.at(i).setArea(ar);
         }
         return true;

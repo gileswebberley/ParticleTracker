@@ -66,13 +66,13 @@ private:
     bool draw_delay{true};
     //replaced by TRACK_TYPE, track_largest{false};
     //track_closest is default when this is false
-    TRACK_TYPE track_flag{TRACK_TYPE::FURTHEST};
+    TRACK_TYPE track_flag{TRACK_TYPE::LARGEST};
     //don't need to track every frame to be responsive
     int track_delay_time{3};
     //alpha channel for controlling the fade
     const float fade_bg_amount{125};
     //set higher for low contrast images [0..255]
-    int difference_threshold{130};
+    int difference_threshold{30};
 
     //add in the particle system...
     //original positions

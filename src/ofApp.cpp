@@ -258,7 +258,7 @@ void ofApp::draw(){
     //now draw the rendered particle system
     renderFBO.draw(0,0);
     tracker->drawInput();//for framing
-    //tracker->drawFindings();//to see tracking boxes
+    tracker->drawFindings();//to see tracking boxes
 }
 
 //--------------------------------------------------------------

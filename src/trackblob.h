@@ -8,8 +8,10 @@
  */
 class TrackBlob
 {
-
+    //dyingTime is for tracking smoothing, this relates to the number of frames
     int wBounding, hBounding, minDist{10}, worldW, worldH, dyingTime{30},dyingDuration{0};
+    //to save grabbing screen width and height each update call
+    float screenWidth, screenHeight;
     //flag so it can know what state it's in
     bool is_init{false}, dying{false};
     //rawPos is not processed so will be the actual position in the video feed

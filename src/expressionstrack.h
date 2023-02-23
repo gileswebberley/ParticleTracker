@@ -24,12 +24,12 @@ class expressionsTrack
     int maxBlobs{10}, blobCnt{0}, killWait{2};
     //size for the grabber etc
     int grabW{352}, grabH{288};
-    //the minimum blob area to be registered in findContours()
+    //the minimum blob area to be registered in findContours() - tweak these to work in the space in which this is running
     float minBlobArea = (grabW*grabH)*0.003;
     //the maximum blob area to be registered in findContours()
     float maxBlobArea = (grabW*grabH)*0.2;
-    //difference threshold for tracking default, set with setUpTrack(int)
-    int diff_threshold{128};
+    //difference threshold for tracking default, set with setUpTrack(int) - higher numbers work with lower contrast
+    int diff_threshold{200};
     //if using diff method is the background image set
     bool diffbgset{false},diff_mode{false};
 
@@ -49,6 +49,10 @@ public:
     bool setupTrack(int diffThreshold);
     //self explanatory?
     bool doFinding();
+    void videoToGrayImage();
+    bool waitForCameraStart(int wait);
+    //so I can test and tweak see what the camera is seeing
+    void drawInput();
     //draw each of the trackblobs...
     void drawFindings();
     //to use it just for getting the position
@@ -59,8 +63,6 @@ public:
     ofPoint getLargestPoint();
     //added in at the last minute to try to make the tracking more dynamic, I'm hoping that it will mean that if the viewer pushes away with their arms it will feel like they're pushing the particle cloud itself
     ofPoint getFurthestPoint(ofPoint point);
-    //so I can test and tweak see what the camera is seeing
-    void drawInput();
     //I failed in making this work as I hoped :(
     ofPoint getGrabWH(){return ofPoint{(float)grabW,(float)grabH};}
 
