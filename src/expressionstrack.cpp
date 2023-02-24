@@ -28,9 +28,7 @@ expressionsTrack::expressionsTrack(int diff_thresh)
 
 expressionsTrack::~expressionsTrack()
 {
-    //    for(ofImage* im : bodyBoxes){
-    //        delete im;
-    //    }
+    //    nothing to clear up in destructor
 }
 
 //setup function for difference tracking method

@@ -23,7 +23,7 @@ class expressionsTrack
     //given it a limit as I was struggling to think of a way to keep track tbh
     int maxBlobs{10}, blobCnt{0}, killWait{2};
     //size for the grabber etc
-    int grabW{352}, grabH{288};
+    int grabW{320}, grabH{180};
     //the minimum blob area to be registered in findContours() - tweak these to work in the space in which this is running
     float minBlobArea = (grabW*grabH)*0.003;
     //the maximum blob area to be registered in findContours()

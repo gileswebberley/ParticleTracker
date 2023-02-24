@@ -124,6 +124,7 @@ void InputSelector::drawInput(bool scale)
             ofScale(sc);
         }
         vidGrabber.draw(0,0);
+        //reset the scale..
         if(scale) ofScale(1);
     }else if(type_flag == IS_TYPES::VID_FILE){
         //+new
@@ -132,6 +133,7 @@ void InputSelector::drawInput(bool scale)
             ofScale(sc);
         }
         vidPlayer.draw(0,0);
+        //reset the scale..
         if(scale) ofScale(1);
     }
 }

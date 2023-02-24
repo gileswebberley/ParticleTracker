@@ -30,7 +30,7 @@ class InputSelector
     ofVideoGrabber vidGrabber;
     ofVideoPlayer vidPlayer;
     ofPixels currentPixels;
-    int isWidth, isHeight;
+    int isWidth{0}, isHeight{0};
     //+new to allow frame jog as an update method
     bool is_jog{false};
     //bool scaling{false};
