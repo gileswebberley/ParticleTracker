@@ -56,10 +56,13 @@ public:
     void setup();
     void update();
     void draw();
+    //exit added to delete expressionsTrack pointer
+    void exit();
 
     void keyPressed(int key);
 
 private:
+    
     //the target tracker, create new in setup()
     expressionsTrack* tracker;
     //int grabW{640}, grabH{480};
@@ -100,13 +103,15 @@ private:
     //width and height of the particle image
     int     imgWidth, imgHeight;
     //total number of particles in the system
-    int     numParticles{200000};
+    int     numParticles{250000};
     //the bigger the particle the slower it runs
     float   particleSize{2.0f};
+
+    //These are the settings that will make it 'feel' nice and produce different reactions to being given a target vector
     //elasticity of each particles behaviour (max and min)
     float elasMin{0.02},elasMax{0.6};
     //maximum start velocity and then min and max resistance
-    float velScale{0.10},resistMin{0.005},resistMax{0.99};
+    float velScale{0.10},resistMin{0.005},resistMax{0.8};
 
     int     textureRes;
 

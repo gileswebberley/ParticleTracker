@@ -6,6 +6,8 @@
 //--------------------------------------------------------------
 void ofApp::setup(){
     cout<<"IN SETUP....\n";
+    //std::unique_ptr<expressionsTrack> trackerRaw(new expressionsTrack(difference_threshold));
+    //tracker = trackerRaw.get(); - THIS CAUSED A CRASH!! just thought I should try to avoid a raw pointer
     //to use difference mode then set the threshold
     tracker = new expressionsTrack(difference_threshold);
     //to use haar cascades...
@@ -264,4 +266,8 @@ void ofApp::draw(){
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key){
 
+}
+void ofApp::exit()
+{
+    delete tracker;
 }

@@ -25,9 +25,9 @@ class expressionsTrack
     //size for the grabber etc
     int grabW{320}, grabH{180};
     //the minimum blob area to be registered in findContours() - tweak these to work in the space in which this is running
-    float minBlobArea = (grabW*grabH)*0.003;
+    float minBlobArea = (grabW*grabH)*0.01;
     //the maximum blob area to be registered in findContours()
-    float maxBlobArea = (grabW*grabH)*0.2;
+    float maxBlobArea = (grabW*grabH)*0.3;
     //difference threshold for tracking default, set with setUpTrack(int) - higher numbers work with lower contrast
     int diff_threshold{200};
     //if using diff method is the background image set
